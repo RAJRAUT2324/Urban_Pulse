@@ -1,9 +1,12 @@
 import React from 'react';
 import { Search, Globe, Accessibility, Phone, Mail, Facebook, Twitter, Instagram, Youtube, Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 
 const TripleHeader = () => {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-    const navItems = ['The Corporation', 'Online Services', 'Departments', 'City Pulse', 'Policies', 'Contact Us'];
+    const navItems = ['The Corporation', 'Online Services', 'Departments', 'City Pulse', 'Policies', 'Login', 'Contact Us'];
+
 
     return (
         <header className="w-full font-heading bg-white">
@@ -87,27 +90,32 @@ const TripleHeader = () => {
             <nav className="header-nav shadow-lg hidden lg:block">
                 <div className="px-20 flex overflow-x-auto scrollbar-none">
                     {navItems.map((item, i) => (
-                        <button
+                        <Link
                             key={i}
+                            to={item === 'Login' ? '/login' : '#'}
                             className={`px-6 py-4 text-[13px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-b-4 border-transparent hover:border-pmc-saffron hover:bg-white/5 ${i === 1 ? 'bg-white/10' : ''}`}
                         >
                             {item}
-                        </button>
+                        </Link>
                     ))}
                 </div>
             </nav>
+
 
             {/* 4. MOBILE MENU DRAWER */}
             <div className={`lg:hidden fixed inset-0 z-40 bg-pmc-blue text-white transition-all duration-500 overflow-y-auto ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}>
                 <div className="pt-32 pb-10 px-6 space-y-2">
                     {navItems.map((item, i) => (
-                        <button
+                        <Link
                             key={i}
-                            className="w-full text-left py-4 px-6 border-b border-white/10 text-lg font-black uppercase tracking-[0.2em] hover:bg-white/5 active:bg-pmc-saffron transition-colors"
+                            to={item === 'Login' ? '/login' : '#'}
+                            onClick={() => setIsMenuOpen(false)}
+                            className="w-full text-left block py-4 px-6 border-b border-white/10 text-lg font-black uppercase tracking-[0.2em] hover:bg-white/5 active:bg-pmc-saffron transition-colors"
                         >
                             {item}
-                        </button>
+                        </Link>
                     ))}
+
                     <div className="pt-8 grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white/5 rounded-2xl">
                             <p className="text-[10px] text-white/50 font-black uppercase tracking-widest mb-2">Language</p>

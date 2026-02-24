@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 
 const HeroSlider = () => {
     const slides = [
@@ -67,10 +69,14 @@ const HeroSlider = () => {
                             <button className="btn-pmc-saffron px-6 md:px-10 py-3 md:py-4 text-xs md:text-sm scale-100 md:scale-110">
                                 {slides[current].cta}
                             </button>
-                            <button className="bg-white/10 backdrop-blur-md text-white border-2 border-white/20 px-6 md:px-10 py-3 md:py-4 rounded font-black uppercase text-[10px] md:text-sm hover:bg-white/20 transition-all">
-                                Learn More
-                            </button>
+                            <Link
+                                to="/login"
+                                className="bg-white/10 backdrop-blur-md text-white border-2 border-white/20 px-6 md:px-10 py-3 md:py-4 rounded font-black uppercase text-[10px] md:text-sm hover:bg-white/20 transition-all flex items-center justify-center"
+                            >
+                                Login to Portal
+                            </Link>
                         </div>
+
                     </motion.div>
                 </div>
             </div>

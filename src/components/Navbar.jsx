@@ -1,5 +1,7 @@
 import React from 'react';
 import { Search, Menu, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 
 const Navbar = () => {
     const menuItems = [
@@ -8,8 +10,10 @@ const Navbar = () => {
         { name: 'Departments', hasChild: true },
         { name: 'About Pune', hasChild: false },
         { name: 'News & Events', hasChild: false },
+        { name: 'Login', hasChild: false, path: '/login' },
         { name: 'Contact', hasChild: false },
     ];
+
 
     return (
         <nav className="bg-white sticky top-0 z-40 shadow-sm border-b border-gray-100">
@@ -33,14 +37,16 @@ const Navbar = () => {
                 {/* Desktop Menu */}
                 <div className="hidden lg:flex items-center gap-1">
                     {menuItems.map((item, idx) => (
-                        <button
+                        <Link
                             key={idx}
+                            to={item.path || '#'}
                             className="px-4 py-2 text-sm font-semibold text-gray-700 hover:text-pmc-blue flex items-center gap-1 transition-colors"
                         >
                             {item.name}
                             {item.hasChild && <ChevronDown size={14} className="opacity-50" />}
-                        </button>
+                        </Link>
                     ))}
+
                     <div className="ml-4 pl-4 border-l border-gray-200">
                         <button className="p-2 text-pmc-blue hover:bg-pmc-blue/5 rounded-full transition-colors">
                             <Search size={20} />
