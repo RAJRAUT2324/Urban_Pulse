@@ -16,7 +16,7 @@ const AshaAgent = () => {
     const utteranceRef = useRef(null);
     const scrollRef = useRef(null);
 
-    const GROQ_API_KEY = "VITE_GROQ_API_KEY_SCUBBED";
+    const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
     useEffect(() => {
         if (isOpen && messages.length === 0) {
@@ -381,6 +381,5 @@ const AshaAgent = () => {
 };
 
 export default AshaAgent;
-
 
 
