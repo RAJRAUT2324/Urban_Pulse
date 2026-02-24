@@ -1,44 +1,62 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
+import { motion } from 'framer-motion';
 import HeroCity from '../components/HeroCity';
 
 const SmartCityPulse = () => {
     return (
-        <section className="py-24 bg-white overflow-hidden">
-            <div className="container mx-auto px-4 md:px-20">
-                <div className="flex flex-col lg:flex-row gap-16 items-center">
-                    <div className="lg:w-1/2">
-                        <div className="inline-block px-4 py-1 bg-pmc-blue/5 text-pmc-blue text-xs font-bold rounded-full mb-4 uppercase tracking-[0.2em]">
+        <section className="py-32 bg-white overflow-hidden">
+            <div className="gov-container">
+                <div className="flex flex-col lg:flex-row gap-20 items-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="lg:w-1/2"
+                    >
+                        <div className="inline-block px-4 py-1.5 bg-pmc-blue/5 text-pmc-blue text-[11px] font-black rounded-full mb-8 uppercase tracking-[0.3em] border border-pmc-blue/10">
                             Technology Showcase
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-black text-pmc-blue mb-8 leading-tight">
+                        <h2 className="text-5xl md:text-7xl font-black text-pmc-blue mb-8 leading-tight tracking-tighter">
                             Digital Twin & <br />
-                            <span className="text-pmc-orange">Real-Time City Pulse</span>
+                            <span className="text-gradient">Real-Time City Pulse</span>
                         </h2>
-                        <p className="text-gray-500 text-lg mb-10 leading-relaxed">
+                        <p className="text-slate-500 text-lg mb-12 leading-relaxed font-medium">
                             UrbanPulse uses advanced neural networks to map every grievance node across the city.
                             Our "Digital Twin" technology allows municipal commissioners to visualize systemic issues
                             before they escalate into city-wide crises.
                         </p>
 
-                        <div className="space-y-6">
+                        <div className="space-y-8">
                             {[
                                 { title: "Neural Response Mapping", desc: "Visualize grievance categories in a real-time 3D dashboard." },
                                 { title: "Predictive Analytics", desc: "AI predicts potential waste & water management failures." },
                                 { title: "Resolution Traceability", desc: "Every point in the grid is a blockchain-verified status." }
                             ].map((item, i) => (
-                                <div key={i} className="flex gap-4">
-                                    <div className="w-6 h-6 rounded-full bg-pmc-blue text-white flex items-center justify-center shrink-0 font-bold text-[10px]">{i + 1}</div>
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="flex gap-6 group"
+                                >
+                                    <div className="w-10 h-10 rounded-2xl bg-pmc-blue text-white flex items-center justify-center shrink-0 font-black text-xs shadow-lg group-hover:bg-pmc-accent transition-colors">{i + 1}</div>
                                     <div>
-                                        <h4 className="font-bold text-pmc-dark">{item.title}</h4>
-                                        <p className="text-gray-400 text-sm">{item.desc}</p>
+                                        <h4 className="font-black text-pmc-blue text-lg tracking-tight mb-1">{item.title}</h4>
+                                        <p className="text-slate-400 font-medium text-sm leading-relaxed">{item.desc}</p>
                                     </div>
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="lg:w-1/2 w-full h-[400px] md:h-[500px] bg-slate-900 rounded-3xl overflow-hidden relative shadow-2xl border-4 border-white">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        className="lg:w-1/2 w-full h-[500px] md:h-[650px] bg-slate-900 rounded-[3rem] overflow-hidden relative shadow-2xl border-x border-t border-white/10"
+                    >
                         <Canvas camera={{ position: [0, 10, 20], fov: 45 }}>
                             <Suspense fallback={null}>
                                 <HeroCity />
@@ -56,7 +74,7 @@ const SmartCityPulse = () => {
                         <div className="absolute bottom-6 left-6 text-white/50 text-[10px] uppercase font-bold tracking-[0.3em]">
                             Pune Urban Digital Twin v2.0
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
         </section>

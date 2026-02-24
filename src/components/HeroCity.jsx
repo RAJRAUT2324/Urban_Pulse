@@ -1,7 +1,10 @@
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+// Note: THREE.Clock is deprecated in v183+, ideally use THREE.Timer or delta from useFrame
 import { Instances, Instance } from '@react-three/drei';
+
+
 
 const GridCity = () => {
     const count = 100;

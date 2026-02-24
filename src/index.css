@@ -1,178 +1,111 @@
 @import "tailwindcss";
 
 @theme {
-  /* Exact PMC Color Palette */
-  --color-pmc-blue: #0d47a1;
-  --color-pmc-blue-dark: #0a3d8a;
-  --color-pmc-saffron: #f57c00;
-  --color-pmc-orange: #ff9800;
-  --color-pmc-bg: #f5f5f5;
-  --color-pmc-text: #212121;
-  --color-pmc-border: #e0e0e0;
+  /* Premium PMC Color Palette */
+  --color-pmc-blue: #0f172a;
+  --color-pmc-blue-light: #1e293b;
+  --color-pmc-accent: #3b82f6;
+  --color-pmc-saffron: #f59e0b;
+  --color-pmc-orange: #fbbf24;
+  --color-pmc-bg: #f8fafc;
+  --color-pmc-text: #0f172a;
+  --color-pmc-border: rgba(226, 232, 240, 0.8);
 
-  --font-sans: "Roboto", "Inter", system-ui, -apple-system, sans-serif;
-  --font-heading: "Roboto Condensed", sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-heading: "Outfit", sans-serif;
 }
 
 @layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800;900&display=swap');
+
   body {
-    @apply bg-white text-pmc-text selection:bg-pmc-blue/10;
+    @apply bg-pmc-bg text-pmc-text selection:bg-pmc-accent/20;
     margin: 0;
     min-height: 100vh;
     overflow-x: hidden;
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  .font-cond {
+  h1, h2, h3, h4, .font-heading {
     font-family: var(--font-heading);
+    letter-spacing: -0.02em;
   }
 
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 10px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-gray-100;
+    @apply bg-slate-100;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-pmc-blue/40 rounded-full hover:bg-pmc-blue/60 transition-colors;
+    @apply bg-slate-300 rounded-full border-4 border-solid border-slate-100 hover:bg-slate-400 transition-colors;
   }
 }
 
-/* Official Government Styles */
+/* Premium Utilities */
+@utility glass-effect {
+  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+}
+
+@utility glass-dark {
+  @apply bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl;
+}
+
+@utility text-gradient {
+  @apply bg-linear-to-r from-pmc-blue via-pmc-accent to-pmc-blue bg-clip-text text-transparent;
+}
+
 @utility gov-container {
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
 }
 
-@utility gov-card {
-  @apply bg-white border border-pmc-border rounded shadow-sm transition-all duration-300;
-
-  &:hover {
-    @apply shadow-md border-pmc-blue/30 -translate-y-1;
-  }
+@utility premium-card {
+  @apply bg-white border border-slate-200/60 rounded-3xl shadow-sm transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2;
 }
 
-@utility btn-pmc-blue {
-  @apply bg-pmc-blue text-white px-6 py-2 rounded font-bold uppercase tracking-wider text-xs transition-all hover:bg-pmc-blue-dark shadow-sm;
+@utility btn-primary {
+  @apply bg-pmc-blue text-white px-8 py-3 rounded-2xl font-bold tracking-tight transition-all duration-300 hover:bg-pmc-accent hover:shadow-xl hover:shadow-blue-500/20 active:scale-95;
 }
 
-@utility btn-pmc-saffron {
-  @apply bg-pmc-saffron text-white px-6 py-2 rounded font-bold uppercase tracking-wider text-xs transition-all hover:bg-orange-700 shadow-sm;
+@utility btn-secondary {
+  @apply bg-white text-pmc-blue border border-slate-200 px-8 py-3 rounded-2xl font-bold tracking-tight transition-all duration-300 hover:bg-slate-50 hover:border-pmc-accent/30 active:scale-95;
 }
 
-@utility marquee-container {
-  @apply w-full bg-pmc-blue text-white py-1.5 overflow-hidden whitespace-nowrap flex;
+/* Enhanced Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }
 
-/* Animations found on official gov sites */
-@keyframes slide-infinite {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-50%);
-  }
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
-.animate-marquee {
-  animation: slide-infinite 40s linear infinite;
+@keyframes slow-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.animate-marquee:hover {
-  animation-play-state: paused;
+.animate-slow-spin {
+  animation: slow-spin 20s linear infinite;
 }
 
-/* Tab/Header specific styles */
-.header-top {
-  @apply bg-gray-100 text-[11px] py-1 border-b border-gray-200;
+/* Glow Effects */
+.glow-blue {
+  box-shadow: 0 0 50px -10px var(--color-pmc-accent);
 }
 
-.header-main {
-  @apply bg-white py-4 md:py-6 border-b border-gray-200;
+.glow-orange {
+  box-shadow: 0 0 50px -10px var(--color-pmc-saffron);
 }
 
-.header-nav {
-  @apply bg-pmc-blue text-white;
-}
-
-.section-title-mod {
-  @apply text-2xl font-black text-pmc-blue mb-6 pb-2 border-b-4 border-pmc-saffron inline-block;
-}
-
-.section-title-mod::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 60px;
-  height: 4px;
-  background: var(--color-pmc-saffron);
-  border-radius: 2px;
-}
-
-/* Circular Menu Animations */
-@keyframes rotate-clockwise {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes rotate-counter-clockwise {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(-360deg);
-  }
-}
-
-.rotateAnimationLeftTop {
-  position: absolute;
-  top: -150px;
-  left: -250px;
-  opacity: 0.08;
-  animation: rotate-clockwise 60s linear infinite;
-  pointer-events: none;
-  width: 600px;
-  height: 600px;
-}
-
-.rotateAnimationBottomRight {
-  position: absolute;
-  bottom: -150px;
-  right: -250px;
-  opacity: 0.08;
-  animation: rotate-counter-clockwise 60s linear infinite;
-  pointer-events: none;
-  width: 600px;
-  height: 600px;
-}
-
-.circular-menu-item {
-  @apply flex items-center gap-4 transition-all duration-300;
-}
-
-.circular-menu-item:hover {
-  @apply -translate-y-1;
-}
-
-.image-wrapper {
-  @apply w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center border-2 border-pmc-blue/10;
-}
-
-.circular-menu-item a {
-  @apply flex items-center gap-4 text-sm font-black text-gray-700 hover:text-pmc-blue no-underline;
+/* Navbar Scrolled State */
+.nav-scrolled {
+  @apply glass-effect py-3;
 }

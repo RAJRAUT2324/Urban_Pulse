@@ -18,21 +18,19 @@ const LandingPage = () => {
             <div id="top" className="absolute top-0"></div>
 
             {/* Official PMC-style Header System */}
-            <header className="fixed top-0 left-0 w-full z-50 shadow-sm">
-                <NewsTicker />
-                <TripleHeader />
+            <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+                {/* <NewsTicker /> */}
+                <TripleHeader isFixed={false} />
             </header>
 
             {/* Main Content Area */}
             {/* 
         Spacing to account for Triple Header + News Ticker:
         News Ticker: ~30px
-        Top Bar: ~32px
-        Mid Header: ~100px
-        Nav Bar: ~52px
-        Total Header: ~214px
+        Triple Header (dynamic): ~110px
+        Total Header: ~140px
       */}
-            <div className="pt-[160px] md:pt-[214px]">
+            <div className="pt-[140px] md:pt-[150px]">
                 {/* Full-width Hero Banner Slider */}
                 <HeroSlider />
 

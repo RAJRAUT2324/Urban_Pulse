@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { User, Mail, Phone, MapPin, Award, Edit2, Save, X, LogOut } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Award, Edit2, Save, X, LogOut, ShieldCheck, ChevronRight, Hash } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import TripleHeader from '../components/TripleHeader';
 
 const ProfilePage = () => {
     const [user, setUser] = useState(null);
@@ -36,7 +38,7 @@ const ProfilePage = () => {
                     Authorization: `Bearer ${token}`,
                 },
             };
-            const { data } = await axios.get('http://localhost:5000/api/users/profile', config);
+            const { data } = await axios.get('http://127.0.0.1:5000/api/users/profile', config);
             setUser(data);
             setFormData({
                 name: data.name,
@@ -64,7 +66,7 @@ const ProfilePage = () => {
                     Authorization: `Bearer ${userInfo.token}`,
                 },
             };
-            const { data } = await axios.put('http://localhost:5000/api/users/profile', formData, config);
+            const { data } = await axios.put('http://127.0.0.1:5000/api/users/profile', formData, config);
             setUser(data);
             localStorage.setItem('userInfo', JSON.stringify({ ...userInfo, ...data }));
             setIsEditing(false);
@@ -79,149 +81,233 @@ const ProfilePage = () => {
         navigate('/login');
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (loading) return (
+        <div className="min-h-screen flex flex-col items-center justify-center gap-6 bg-slate-50">
+            <div className="w-16 h-16 border-4 border-pmc-blue border-t-pmc-accent rounded-full animate-spin"></div>
+            <p className="font-black text-pmc-blue uppercase tracking-[0.4em] text-xs animate-pulse">Retrieving Profile...</p>
+        </div>
+    );
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-                <div className="bg-pmc-blue px-8 py-12 text-white relative">
-                    <button
-                        onClick={logoutHandler}
-                        className="absolute top-4 right-4 flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full transition-colors text-sm font-bold"
-                    >
-                        <LogOut size={16} /> Logout
-                    </button>
-                    <div className="flex items-center gap-6">
-                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-pmc-blue">
-                            <User size={48} />
-                        </div>
-                        <div>
-                            <h1 className="text-4xl font-black">{user?.name}</h1>
-                            <p className="inline-block mt-2 px-3 py-1 bg-pmc-orange rounded-full text-xs font-bold uppercase tracking-wider">
-                                {user?.role}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+        <div className="min-h-screen bg-slate-50/50">
+            <TripleHeader />
 
-                <div className="p-8">
-                    {error && <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg text-sm">{error}</div>}
-                    {success && <div className="mb-6 p-4 bg-green-50 text-green-600 rounded-lg text-sm">{success}</div>}
-
-                    <div className="flex justify-between items-center mb-8">
-                        <h2 className="text-2xl font-bold text-gray-800">User Information</h2>
-                        {!isEditing ? (
-                            <button
-                                onClick={() => setIsEditing(true)}
-                                className="flex items-center gap-2 text-pmc-blue hover:bg-pmc-blue/5 px-4 py-2 rounded-lg transition-colors font-bold"
+            <div className="pt-40 pb-32">
+                <main className="gov-container max-w-5xl">
+                    <div className="grid lg:grid-cols-12 gap-10">
+                        {/* Profile Sidebar */}
+                        <div className="lg:col-span-4 space-y-8">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="premium-card p-10 bg-pmc-blue text-white relative overflow-hidden group"
                             >
-                                <Edit2 size={18} /> Edit Profile
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => setIsEditing(false)}
-                                className="flex items-center gap-2 text-gray-500 hover:bg-gray-100 px-4 py-2 rounded-lg transition-colors font-bold"
-                            >
-                                <X size={18} /> Cancel
-                            </button>
-                        )}
-                    </div>
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-pmc-accent/20 rounded-full blur-[60px] -mr-16 -mt-16" />
+                                <div className="relative z-10 flex flex-col items-center text-center">
+                                    <div className="w-24 h-24 rounded-4xl glass-dark border-white/10 flex items-center justify-center text-white shadow-2xl mb-6 ring-4 ring-white/5">
+                                        <User size={48} />
+                                    </div>
+                                    <h1 className="text-3xl font-black tracking-tighter mb-2">{user?.name}</h1>
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pmc-accent/20 text-pmc-accent text-[10px] font-black uppercase tracking-widest border border-pmc-accent/30">
+                                        <ShieldCheck size={12} /> {user?.role}
+                                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Credit Score Pillar */}
-                        <div className="bg-pmc-blue/5 p-6 rounded-2xl border border-pmc-blue/10 flex flex-col items-center justify-center text-center">
-                            <Award className="text-pmc-orange mb-4" size={48} />
-                            <h3 className="text-gray-600 font-bold uppercase tracking-widest text-xs mb-1">Score Credit</h3>
-                            <p className="text-5xl font-black text-pmc-blue">{user?.scoreCredit}</p>
-                            <p className="mt-2 text-xs text-pmc-blue/60 font-medium italic">Active contributor status</p>
-                        </div>
+                                    <div className="w-full h-px bg-white/10 my-8" />
 
-                        {/* Profile Data */}
-                        <form onSubmit={submitHandler} className="space-y-4">
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                    <Mail className="text-pmc-blue" size={20} />
-                                    <div className="flex-1">
-                                        <p className="text-[10px] uppercase font-bold text-gray-400">Email Address</p>
-                                        {isEditing ? (
-                                            <input
-                                                type="email"
-                                                className="w-full bg-transparent border-b border-pmc-blue focus:outline-none text-sm py-1"
-                                                value={formData.email}
-                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            />
-                                        ) : (
-                                            <p className="text-gray-700 font-bold">{user?.email}</p>
-                                        )}
+                                    <div className="w-full space-y-4">
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-white/40 font-black uppercase tracking-widest">Trust Score</span>
+                                            <span className="font-black text-pmc-accent">{user?.scoreCredit}</span>
+                                        </div>
+                                        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                            <div className="h-full bg-pmc-accent" style={{ width: `${Math.min((user?.scoreCredit || 0) / 10, 100)}%` }} />
+                                        </div>
                                     </div>
                                 </div>
+                            </motion.div>
 
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                    <Phone className="text-pmc-blue" size={20} />
-                                    <div className="flex-1">
-                                        <p className="text-[10px] uppercase font-bold text-gray-400">Phone Number</p>
-                                        {isEditing ? (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                                className="premium-card p-8 bg-white"
+                            >
+                                <h3 className="text-sm font-black text-pmc-blue uppercase tracking-widest mb-6 border-b border-slate-100 pb-4">Actions</h3>
+                                <div className="space-y-2">
+                                    <button onClick={() => navigate('/city-pulse')} className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-slate-50 transition-all font-black text-xs text-slate-500 hover:text-pmc-blue group">
+                                        Governance Dashboard <ChevronRight size={16} className="text-slate-200 group-hover:translate-x-1 transition-transform" />
+                                    </button>
+                                    <button onClick={logoutHandler} className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-red-50 transition-all font-black text-xs text-red-400 group">
+                                        Terminate Session <LogOut size={16} className="group-hover:translate-x-1 transition-transform" />
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
+
+                        {/* Profile Content */}
+                        <div className="lg:col-span-8 space-y-8">
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="premium-card p-10 md:p-14 bg-white"
+                            >
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
+                                    <div>
+                                        <h2 className="text-3xl font-black text-pmc-blue tracking-tighter mb-2">Account Detail</h2>
+                                        <p className="text-slate-400 font-medium tracking-tight">Manage your personal information and preferences.</p>
+                                    </div>
+                                    {!isEditing ? (
+                                        <button
+                                            onClick={() => setIsEditing(true)}
+                                            className="px-6 py-3 rounded-2xl bg-pmc-blue/5 text-pmc-blue font-black text-xs uppercase tracking-widest hover:bg-pmc-blue hover:text-white transition-all flex items-center gap-3"
+                                        >
+                                            <Edit2 size={16} /> Edit Profile
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => setIsEditing(false)}
+                                            className="px-6 py-3 rounded-2xl bg-red-50 text-red-500 font-black text-xs uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all flex items-center gap-3"
+                                        >
+                                            <X size={16} /> Cancel
+                                        </button>
+                                    )}
+                                </div>
+
+                                <AnimatePresence mode="wait">
+                                    {error && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            className="mb-8 p-5 bg-red-50 border border-red-100 text-red-500 rounded-2xl text-[11px] font-black uppercase tracking-widest text-center"
+                                        >
+                                            {error}
+                                        </motion.div>
+                                    )}
+                                    {success && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            className="mb-8 p-5 bg-green-50 border border-green-100 text-green-600 rounded-2xl text-[11px] font-black uppercase tracking-widest text-center"
+                                        >
+                                            {success}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                <form onSubmit={submitHandler} className="grid md:grid-cols-2 gap-8">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Full Identity</label>
+                                        <div className="relative group">
+                                            <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-pmc-accent transition-colors" size={20} />
                                             <input
                                                 type="text"
-                                                className="w-full bg-transparent border-b border-pmc-blue focus:outline-none text-sm py-1"
-                                                value={formData.phoneNumber}
-                                                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                                                placeholder="Add phone number"
-                                            />
-                                        ) : (
-                                            <p className="text-gray-700 font-bold">{user?.phoneNumber || 'N/A'}</p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                    <MapPin className="text-pmc-blue" size={20} />
-                                    <div className="flex-1">
-                                        <p className="text-[10px] uppercase font-bold text-gray-400">Local Address</p>
-                                        {isEditing ? (
-                                            <input
-                                                type="text"
-                                                className="w-full bg-transparent border-b border-pmc-blue focus:outline-none text-sm py-1"
-                                                value={formData.address}
-                                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                                placeholder="Add address"
-                                            />
-                                        ) : (
-                                            <p className="text-gray-700 font-bold">{user?.address || 'N/A'}</p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {isEditing && (
-                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                                        <div className="flex-1">
-                                            <p className="text-[10px] uppercase font-bold text-gray-400">Change Password (optional)</p>
-                                            <input
-                                                type="password"
-                                                className="w-full bg-transparent border-b border-pmc-blue focus:outline-none text-sm py-1"
-                                                value={formData.password}
-                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                                placeholder="Enter new password"
+                                                disabled={!isEditing}
+                                                className={`w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 focus:ring-4 focus:ring-pmc-blue/5 outline-none transition-all font-bold text-pmc-blue ${!isEditing ? 'opacity-70 cursor-not-allowed' : 'focus:border-pmc-blue'}`}
+                                                value={formData.name}
+                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             />
                                         </div>
                                     </div>
-                                )}
-                            </div>
 
-                            {isEditing && (
-                                <button
-                                    type="submit"
-                                    className="w-full mt-6 bg-pmc-blue text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-pmc-blue/90 transition-all shadow-lg"
-                                >
-                                    <Save size={20} /> Save Changes
-                                </button>
-                            )}
-                        </form>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Email Address</label>
+                                        <div className="relative group">
+                                            <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-pmc-accent transition-colors" size={20} />
+                                            <input
+                                                type="email"
+                                                disabled={!isEditing}
+                                                className={`w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 focus:ring-4 focus:ring-pmc-blue/5 outline-none transition-all font-bold text-pmc-blue ${!isEditing ? 'opacity-70 cursor-not-allowed' : 'focus:border-pmc-blue'}`}
+                                                value={formData.email}
+                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Phone Number</label>
+                                        <div className="relative group">
+                                            <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-pmc-accent transition-colors" size={20} />
+                                            <input
+                                                type="text"
+                                                disabled={!isEditing}
+                                                className={`w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 focus:ring-4 focus:ring-pmc-blue/5 outline-none transition-all font-bold text-pmc-blue ${!isEditing ? 'opacity-70 cursor-not-allowed' : 'focus:border-pmc-blue'}`}
+                                                placeholder="Enter contact number"
+                                                value={formData.phoneNumber}
+                                                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Local Address</label>
+                                        <div className="relative group">
+                                            <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-pmc-accent transition-colors" size={20} />
+                                            <input
+                                                type="text"
+                                                disabled={!isEditing}
+                                                className={`w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 focus:ring-4 focus:ring-pmc-blue/5 outline-none transition-all font-bold text-pmc-blue ${!isEditing ? 'opacity-70 cursor-not-allowed' : 'focus:border-pmc-blue'}`}
+                                                placeholder="Enter your residence"
+                                                value={formData.address}
+                                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {isEditing && (
+                                        <div className="space-y-2 md:col-span-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Credential Update (Optional)</label>
+                                            <div className="relative group">
+                                                <Hash className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-pmc-accent transition-colors" size={20} />
+                                                <input
+                                                    type="password"
+                                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 focus:ring-4 focus:ring-pmc-blue/5 focus:border-pmc-blue outline-none transition-all font-bold text-pmc-blue"
+                                                    placeholder="Keep empty to maintain current password"
+                                                    value={formData.password}
+                                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {isEditing && (
+                                        <div className="md:col-span-2 pt-4">
+                                            <button
+                                                type="submit"
+                                                className="w-full py-5 bg-pmc-accent text-white rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-pmc-accent/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+                                            >
+                                                <Save size={18} /> Commit Changes
+                                            </button>
+                                        </div>
+                                    )}
+                                </form>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.2 }}
+                                className="premium-card p-10 bg-slate-900 text-white relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 w-40 h-40 bg-pmc-saffron/10 rounded-full blur-[60px]" />
+                                <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                                    <div className="w-20 h-20 bg-pmc-saffron/10 rounded-4xl flex items-center justify-center text-pmc-saffron shrink-0 border border-pmc-saffron/20">
+                                        <Award size={40} />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-2xl font-black tracking-tighter mb-2">PMC Elite Citizen Program</h4>
+                                        <p className="text-slate-400 font-medium text-sm leading-relaxed">
+                                            You are currently at <span className="text-pmc-saffron font-black">Level {Math.floor((user?.scoreCredit || 0) / 100) + 1}</span>. Keep reporting issues and verifying resolutions to earn more impact credits and unlock exclusive city benefits.
+                                        </p>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
                     </div>
-                </div>
+                </main>
             </div>
         </div>
     );
 };
 
 export default ProfilePage;
+

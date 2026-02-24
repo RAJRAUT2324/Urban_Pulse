@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
+import CityPulse from './pages/CityPulse';
 import Navbar from './components/Navbar';
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/city-pulse" element={<CityPulse />} />
         </Routes>
       </div>
     </Router>

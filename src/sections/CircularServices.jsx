@@ -19,52 +19,49 @@ const CircularServices = () => {
     ];
 
     return (
-        <section className="relative py-32 bg-gray-50 overflow-hidden font-sans">
-            {/* Background Rotating Ornaments - Enhanced */}
-            <div className="rotateAnimationLeftTop border-[40px] border-pmc-blue/5 rounded-full blur-3xl opacity-20"></div>
-            <div className="rotateAnimationBottomRight border-[40px] border-pmc-blue/5 rounded-full blur-3xl opacity-20"></div>
+        <section className="relative py-40 bg-slate-50 overflow-hidden">
+            {/* Background Ornaments */}
+            <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-pmc-accent/5 rounded-full blur-[120px] -translate-y-1/2" />
+            <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-pmc-saffron/5 rounded-full blur-[120px] translate-y-1/2" />
 
-            <div className="container mx-auto px-4 relative z-10">
+            <div className="gov-container relative z-10">
                 <motion.div
-                    initial={{ opacity: 0, y: -20 }}
+                    initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    className="text-center mb-20"
+                    viewport={{ once: true }}
+                    className="text-center mb-32"
                 >
-                    <h2 className="text-4xl md:text-5xl font-black text-pmc-blue mb-4 tracking-tighter">
-                        UrbanPulse सेवा आपल्यासाठी
-                    </h2>
-                    <div className="flex items-center justify-center gap-4">
-                        <div className="h-0.5 w-12 bg-pmc-saffron rounded-full"></div>
-                        <span className="text-sm font-black text-pmc-saffron uppercase tracking-[0.4em]">Services for You</span>
-                        <div className="h-0.5 w-12 bg-pmc-saffron rounded-full"></div>
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-effect border-slate-200 mb-6">
+                        <span className="text-[11px] font-black uppercase tracking-[0.3em] text-pmc-accent">Citizens First</span>
                     </div>
+                    <h2 className="text-5xl md:text-7xl font-black text-pmc-blue mb-6 tracking-tighter">
+                        UrbanPulse <span className="text-gradient">सेवा आपल्यासाठी</span>
+                    </h2>
+                    <p className="text-slate-500 font-medium max-w-2xl mx-auto text-lg leading-relaxed">
+                        Access official Pune Municipal Corporation services through our ultra-responsive AI-integrated portal.
+                    </p>
                 </motion.div>
 
                 <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-32">
-                    {/* Left Menu - Orbit Animated (Horizontal/Grid on Mobile) */}
+                    {/* Left Menu */}
                     <div className="w-full lg:w-1/3">
-                        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-col gap-6 lg:gap-10 lg:items-end">
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-col gap-6 lg:items-end">
                             {lhsMenu.map((item, i) => (
                                 <motion.li
                                     key={i}
-                                    initial={{ opacity: 0, x: -20 }}
+                                    initial={{ opacity: 0, x: -30 }}
                                     whileInView={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: i * 0.1, duration: 0.6 }}
-                                    className="circular-menu-item group flex lg:flex-row-reverse"
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="group w-full max-w-sm"
                                 >
-                                    <a href="#" className="flex lg:flex-row-reverse text-left lg:text-right items-center w-full">
-                                        <motion.div
-                                            animate={{
-                                                scale: [1, 1.05, 1],
-                                            }}
-                                            transition={{ repeat: Infinity, duration: 4, delay: i * 0.5 }}
-                                            className="image-wrapper group-hover:border-pmc-saffron group-hover:bg-pmc-blue group-hover:text-white transition-all duration-500 w-12 h-12 lg:w-14 lg:h-14 shrink-0"
-                                        >
-                                            <img src={item.icon} alt={item.label} className="w-6 h-6 lg:w-7 lg:h-7 object-contain group-hover:invert transition-all" />
-                                        </motion.div>
-                                        <div className="flex flex-col px-4 lg:pr-6">
-                                            <span className="text-gray-900 font-black text-sm lg:text-lg group-hover:text-pmc-blue transition-colors leading-tight">{item.name}</span>
-                                            <span className="text-[9px] lg:text-[10px] text-pmc-saffron font-black uppercase tracking-widest">{item.label}</span>
+                                    <a href="#" className="flex lg:flex-row-reverse items-center gap-4 lg:gap-6 premium-card p-4 hover:border-pmc-accent/30 glass-effect">
+                                        <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center group-hover:bg-pmc-blue group-hover:scale-110 transition-all duration-500 shrink-0">
+                                            <img src={item.icon} alt={item.label} className="w-7 h-7 object-contain group-hover:invert transition-all" />
+                                        </div>
+                                        <div className="flex flex-col lg:items-end text-left lg:text-right overflow-hidden">
+                                            <span className="text-slate-900 font-black text-lg group-hover:text-pmc-accent transition-colors truncate w-full">{item.name}</span>
+                                            <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">{item.label}</span>
                                         </div>
                                     </a>
                                 </motion.li>
@@ -72,87 +69,78 @@ const CircularServices = () => {
                         </ul>
                     </div>
 
-                    {/* Central Logo - Floating & Rotating Orbits */}
-                    <div className="relative flex flex-col items-center justify-center">
-                        {/* Rotating Orbital Rings - Responsive sizes */}
+                    {/* Central Interactive Core */}
+                    <div className="relative flex items-center justify-center py-20">
+                        {/* Recursive Orbits */}
                         <motion.div
                             animate={{ rotate: 360 }}
-                            transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-                            className="absolute w-[280px] h-[280px] md:w-[350px] md:h-[350px] border border-dashed border-pmc-blue/10 rounded-full"
-                        ></motion.div>
+                            transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+                            className="absolute w-[300px] h-[300px] md:w-[450px] md:h-[450px] border border-dashed border-pmc-accent/20 rounded-full"
+                        />
                         <motion.div
                             animate={{ rotate: -360 }}
-                            transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
-                            className="absolute w-[350px] h-[350px] md:w-[450px] md:h-[450px] border border-dashed border-pmc-saffron/10 rounded-full"
-                        ></motion.div>
+                            transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
+                            className="absolute w-[400px] h-[400px] md:w-[600px] md:h-[600px] border border-dashed border-pmc-saffron/10 rounded-full"
+                        />
 
+                        {/* Central Pulse Hub */}
                         <motion.div
-                            animate={{
-                                y: [0, -10, 0],
-                                rotateZ: [0, 1, 0, -1, 0]
-                            }}
-                            transition={{
-                                repeat: Infinity,
-                                duration: 6,
-                                ease: "easeInOut"
-                            }}
-                            className="w-48 h-48 md:w-72 md:h-72 rounded-full bg-white shadow-2xl flex flex-col items-center justify-center p-6 md:p-8 border-[8px] md:border-[12px] border-gray-50/50 relative z-20 backdrop-blur-sm"
+                            whileHover={{ scale: 1.05 }}
+                            className="w-56 h-56 md:w-80 md:h-80 rounded-[3.5rem] bg-white shadow-2xl flex flex-col items-center justify-center p-8 border border-white relative z-20 group cursor-pointer"
                         >
-                            <div className="bg-pmc-blue w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center mb-4 md:mb-6 border-2 md:border-4 border-pmc-saffron shadow-lg relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-linear-to-br from-pmc-accent/5 to-transparent rounded-[3.5rem]" />
+                            <div className="w-20 h-20 md:w-28 md:h-28 bg-pmc-blue rounded-3xl flex items-center justify-center mb-6 relative overflow-hidden shadow-xl shadow-blue-500/20">
+                                <span className="text-white text-3xl md:text-5xl font-black italic relative z-10">UP</span>
                                 <motion.div
                                     animate={{ rotate: 360 }}
-                                    transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-                                    className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0"
-                                ></motion.div>
-                                <span className="text-white text-2xl md:text-4xl font-black italic relative z-10">UP</span>
+                                    transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+                                    className="absolute inset-0 bg-linear-to-tr from-white/0 via-white/30 to-white/0"
+                                />
                             </div>
-                            <h3 className="text-lg md:text-2xl font-black text-pmc-blue tracking-tighter text-center leading-none">
-                                URBAN<span className="text-pmc-saffron">PULSE</span>
+                            <h3 className="text-2xl md:text-3xl font-black text-pmc-blue tracking-tighter text-center leading-none">
+                                URBAN<span className="text-pmc-accent">PULSE</span>
                             </h3>
-                            <div className="h-0.5 w-6 bg-pmc-saffron/20 my-2 md:my-3 rounded-full"></div>
-                            <p className="text-[7px] md:text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] md:tracking-[0.3em] text-center max-w-[100px] md:max-w-[120px]">
-                                Municipal E-Governance Portal
+                            <div className="h-1 w-8 bg-pmc-saffron mt-4 mb-2 rounded-full" />
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] text-center max-w-[140px]">
+                                Municipal E-Hub
                             </p>
                         </motion.div>
 
-                        {/* Pulsing Dots around the center - Hidden on small mobile */}
-                        {[0, 60, 120, 180, 240, 300].map((deg, i) => (
+                        {/* Floating Micro-particles */}
+                        {[0, 72, 144, 216, 288].map((deg, i) => (
                             <motion.div
                                 key={i}
-                                animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0.6, 0.3] }}
-                                transition={{ repeat: Infinity, duration: i + 2, delay: i * 0.2 }}
-                                className="absolute w-2 h-2 md:w-3 md:h-3 bg-pmc-saffron/20 rounded-full hidden md:block"
-                                style={{
-                                    transform: `rotate(${deg}deg) translateX(180px)`
+                                animate={{
+                                    scale: [1, 1.5, 1],
+                                    opacity: [0.2, 0.5, 0.2],
+                                    x: [Math.cos(deg) * 200, Math.cos(deg) * 220, Math.cos(deg) * 200],
+                                    y: [Math.sin(deg) * 200, Math.sin(deg) * 220, Math.sin(deg) * 200]
                                 }}
-                            ></motion.div>
+                                transition={{ repeat: Infinity, duration: 4 + i, ease: "easeInOut" }}
+                                className="absolute w-2 h-2 bg-pmc-accent rounded-full blur-[1px]"
+                            />
                         ))}
                     </div>
 
-                    {/* Right Menu - Orbit Animated (Horizontal/Grid on Mobile) */}
+                    {/* Right Menu */}
                     <div className="w-full lg:w-1/3">
-                        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-col gap-6 lg:gap-10 lg:items-start">
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-col gap-6 lg:items-start">
                             {rhsMenu.map((item, i) => (
                                 <motion.li
                                     key={i}
-                                    initial={{ opacity: 0, x: 20 }}
+                                    initial={{ opacity: 0, x: 30 }}
                                     whileInView={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: i * 0.1, duration: 0.6 }}
-                                    className="circular-menu-item group"
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="group w-full max-w-sm"
                                 >
-                                    <a href="#" className="text-left items-center flex w-full">
-                                        <motion.div
-                                            animate={{
-                                                scale: [1, 1.05, 1],
-                                            }}
-                                            transition={{ repeat: Infinity, duration: 4, delay: i * 0.5 }}
-                                            className="image-wrapper group-hover:border-pmc-blue group-hover:bg-pmc-saffron group-hover:text-white transition-all duration-500 w-12 h-12 lg:w-14 lg:h-14 shrink-0"
-                                        >
-                                            <img src={item.icon} alt={item.label} className="w-6 h-6 lg:w-7 lg:h-7 object-contain group-hover:invert transition-all" />
-                                        </motion.div>
-                                        <div className="flex flex-col pl-4 lg:pl-6">
-                                            <span className="text-gray-900 font-black text-sm lg:text-lg group-hover:text-pmc-blue transition-colors leading-tight">{item.name}</span>
-                                            <span className="text-[9px] lg:text-[10px] text-pmc-saffron font-black uppercase tracking-widest">{item.label}</span>
+                                    <a href="#" className="flex items-center gap-4 lg:gap-6 premium-card p-4 hover:border-pmc-accent/30 glass-effect">
+                                        <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center group-hover:bg-pmc-saffron group-hover:scale-110 transition-all duration-500 shrink-0">
+                                            <img src={item.icon} alt={item.label} className="w-7 h-7 object-contain group-hover:invert transition-all" />
+                                        </div>
+                                        <div className="flex flex-col text-left overflow-hidden">
+                                            <span className="text-slate-900 font-black text-lg group-hover:text-pmc-accent transition-colors truncate w-full">{item.name}</span>
+                                            <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">{item.label}</span>
                                         </div>
                                     </a>
                                 </motion.li>
@@ -166,3 +154,4 @@ const CircularServices = () => {
 };
 
 export default CircularServices;
+
