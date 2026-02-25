@@ -1,21 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const CircularServices = () => {
     const lhsMenu = [
-        { name: "तक्रार निवारण", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-12/pmcgrievence-control.png", label: "Grievance Redressal" },
-        { name: "रुग्णालये", icon: "https://webadmin.pmc.gov.in/sites/default/files/2024-12/Frame%201000009336.png", label: "Hospitals" },
-        { name: "कचरा व्यवस्थापन", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-12/pmcGarbageCollection.png", label: "Garbage Collection" },
-        { name: "नाट्यगृह आणि आर्ट गॅलरी", icon: "https://webadmin.pmc.gov.in/sites/default/files/2024-12/Entertainment.png", label: "Theater & Art" },
-        { name: "स्मशानभूमी", icon: "https://webadmin.pmc.gov.in/sites/default/files/2024-12/Frame%201000009341.png", label: "Crematoriums" }
+        { name: "तक्रार निवारण", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-12/pmcgrievence-control.png", label: "Grievance Redressal", path: "/urban-seva/grievance" },
+        { name: "रुग्णालये", icon: "https://webadmin.pmc.gov.in/sites/default/files/2024-12/Frame%201000009336.png", label: "Hospitals", path: "/urban-seva/hospitals" },
+        { name: "कचरा व्यवस्थापन", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-12/pmcGarbageCollection.png", label: "Garbage Collection", path: "/urban-seva/garbage" },
+        { name: "नाट्यगृह आणि आर्ट गॅलरी", icon: "https://webadmin.pmc.gov.in/sites/default/files/2024-12/Entertainment.png", label: "Theater & Art", path: "/urban-seva/theater-art" },
+        { name: "स्मशानभूमी", icon: "https://webadmin.pmc.gov.in/sites/default/files/2024-12/Frame%201000009341.png", label: "Crematoriums", path: "/urban-seva/crematoriums" }
     ];
 
     const rhsMenu = [
-        { name: "ऑनलाईन सेवा", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-03/pmc-online-services.png", label: "Online Services" },
-        { name: "मिळकत कर आकारणी", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-12/Property20tax.png", label: "Property Tax" },
-        { name: "सार्वजनिक वाहतूक", icon: "https://webadmin.pmc.gov.in/sites/default/files/2026-02/Transport-1.png", label: "Public Transport" },
-        { name: "सेवाभरती", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-12/recruitment.png", label: "Recruitment" },
-        { name: "उद्याने", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-12/Frame%20201000009339.png", label: "Gardens" }
+        { name: "ऑनलाईन सेवा", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-03/pmc-online-services.png", label: "Online Services", path: "/urban-seva/online-services" },
+        { name: "मिळकत कर आकारणी", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-12/Property20tax.png", label: "Property Tax", path: "/urban-seva/property-tax" },
+        { name: "सार्वजनिक वाहतूक", icon: "https://webadmin.pmc.gov.in/sites/default/files/2026-02/Transport-1.png", label: "Public Transport", path: "/urban-seva/transport" },
+        { name: "सेवाभरती", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-12/recruitment.png", label: "Recruitment", path: "/urban-seva/recruitment" },
+        { name: "उद्याने", icon: "https://webadmin.pmc.gov.in/sites/default/files/2025-12/Frame%20201000009339.png", label: "Gardens", path: "/urban-seva/gardens" }
     ];
 
     return (
@@ -55,7 +56,7 @@ const CircularServices = () => {
                                     transition={{ delay: i * 0.1 }}
                                     className="group w-full max-w-sm"
                                 >
-                                    <a href="#" className="flex lg:flex-row-reverse items-center gap-4 lg:gap-6 premium-card p-4 hover:border-pmc-accent/30 glass-effect">
+                                    <Link to={item.path} className="flex lg:flex-row-reverse items-center gap-4 lg:gap-6 premium-card p-4 hover:border-pmc-accent/30 glass-effect">
                                         <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center group-hover:bg-pmc-blue group-hover:scale-110 transition-all duration-500 shrink-0">
                                             <img src={item.icon} alt={item.label} className="w-7 h-7 object-contain group-hover:invert transition-all" />
                                         </div>
@@ -63,7 +64,7 @@ const CircularServices = () => {
                                             <span className="text-slate-900 font-black text-lg group-hover:text-pmc-accent transition-colors truncate w-full">{item.name}</span>
                                             <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">{item.label}</span>
                                         </div>
-                                    </a>
+                                    </Link>
                                 </motion.li>
                             ))}
                         </ul>
@@ -134,7 +135,7 @@ const CircularServices = () => {
                                     transition={{ delay: i * 0.1 }}
                                     className="group w-full max-w-sm"
                                 >
-                                    <a href="#" className="flex items-center gap-4 lg:gap-6 premium-card p-4 hover:border-pmc-accent/30 glass-effect">
+                                    <Link to={item.path} className="flex items-center gap-4 lg:gap-6 premium-card p-4 hover:border-pmc-accent/30 glass-effect">
                                         <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center group-hover:bg-pmc-saffron group-hover:scale-110 transition-all duration-500 shrink-0">
                                             <img src={item.icon} alt={item.label} className="w-7 h-7 object-contain group-hover:invert transition-all" />
                                         </div>
@@ -142,7 +143,7 @@ const CircularServices = () => {
                                             <span className="text-slate-900 font-black text-lg group-hover:text-pmc-accent transition-colors truncate w-full">{item.name}</span>
                                             <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">{item.label}</span>
                                         </div>
-                                    </a>
+                                    </Link>
                                 </motion.li>
                             ))}
                         </ul>

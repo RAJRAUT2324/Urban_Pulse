@@ -1,7 +1,25 @@
 import Grievance from '../models/Grievance.js';
 import AuditLog from '../models/AuditLog.js';
 import User from '../models/User.js';
+import Asset from '../models/Asset.js';
 import { createBlockData } from '../utils/ledgerUtils.js';
+
+// --- HELPER: AI Priority Calculation ---
+const calculateInternalPriority = (category, description, locationContext = {}) => {
+    let severity = 5;
+    if (category === 'Pothole') severity = 7;
+    if (category === 'Health Hazard') severity = 10;
+    if (category === 'Drainage Leak') severity = 8;
+
+    let multiplier = 1.0;
+    if (description.toLowerCase().includes('hospital')) multiplier *= 2.0;
+    if (description.toLowerCase().includes('school')) multiplier *= 1.8;
+    if (description.toLowerCase().includes('highway') || description.toLowerCase().includes('main road')) multiplier *= 1.5;
+
+    // Population impact mock
+    const popFactor = 5;
+    return severity * popFactor * multiplier;
+};
 
 // @desc    Submit a new grievance
 // @route   POST /api/grievances
@@ -11,28 +29,68 @@ export const submitGrievance = async (req, res) => {
         const {
             citizenName, email, phone, category, location,
             description, latitude, longitude, exifTimestamp,
-            proofUrl, userId
+            proofUrl, userId, assetId
         } = req.body;
 
         const grievanceId = 'GRV' + Math.floor(100000 + Math.random() * 900000);
+
+        // 1. AI Department Assignment
+        const categoryMap = {
+            'Pothole': 'Roads',
+            'Drainage Leak': 'Water',
+            'Water Supply': 'Water',
+            'Streetlight': 'Electricity',
+            'Garbage': 'Waste Management',
+            'Health Hazard': 'Public Health'
+        };
+        const department = categoryMap[category] || 'Other';
+
+        // 2. AI Dynamic Priority
+        const priorityScore = calculateInternalPriority(category, description);
+
+        // 3. AI Root-Cause & Asset Tracking
+        const aiAnalysis = {
+            rootCause: "Awaiting deeper correlation...",
+            structuralHealth: 100, // default
+            historicalFrequency: 0,
+            contextEscalation: priorityScore > 80
+        };
+
+        if (assetId) {
+            const asset = await Asset.findOne({ assetId });
+            if (asset) {
+                asset.failureCount18Months += 1;
+                asset.lastFailureDate = new Date();
+
+                if (asset.failureCount18Months >= 10) {
+                    asset.healthStatus = 'STRUCTURAL_FATIGUE';
+                    asset.recommendation = 'FULL_REBUILD';
+                } else if (asset.failureCount18Months >= 5) {
+                    asset.healthStatus = 'DEGRADED';
+                    asset.recommendation = 'PATCH';
+                }
+
+                aiAnalysis.historicalFrequency = asset.failureCount18Months;
+                aiAnalysis.structuralHealth = asset.healthStatus === 'GOOD' ? 90 : (asset.healthStatus === 'DEGRADED' ? 40 : 10);
+                aiAnalysis.rootCause = asset.healthStatus === 'STRUCTURAL_FATIGUE' ?
+                    "Chronic failure history detected. Recommend full infrastructure rebuild." :
+                    "AI correlating with local asset health profiles...";
+
+                await asset.save();
+            }
+        }
 
         // Initial block data
         const blockData = createBlockData(null, 'Grievance Created', '0');
 
         const grievance = await Grievance.create({
-            citizenName,
-            email,
-            phone,
-            category,
-            location,
-            latitude,
-            longitude,
-            exifTimestamp,
-            description,
-            grievanceId,
-            proofUrl,
-            originalReporter: userId,
-            lastHash: blockData.currentHash
+            citizenName, email, phone, category, location,
+            latitude, longitude, exifTimestamp, description,
+            grievanceId, proofUrl, originalReporter: userId,
+            lastHash: blockData.currentHash,
+            department, priorityScore, aiAnalysis,
+            status: 'AI Classified',
+            assetId
         });
 
         // Update block with actual ticket DB ID
@@ -72,13 +130,17 @@ export const updateGrievanceStatus = async (req, res) => {
             metadata: actionMetadata
         });
 
-        // Mock WhatsApp Notification if moving to 'Resolved'
+        // WhatsApp Notification & Learning Loop
         if (status === 'Resolved') {
-            console.log('\n--- MOCK WHATSAPP NOTIFICATION ---');
-            console.log(`To: ${grievance.phone}`);
-            console.log(`Message: Dear ${grievance.citizenName}, your report ${grievance.grievanceId} has been marked as RESOLVED by the department.`);
-            console.log(`Please provide your feedback here: http://127.0.0.1:5173/city-pulse`);
-            console.log('----------------------------------\n');
+            console.log(`\n--- WHATSAPP: Dear ${grievance.citizenName}, report ${grievance.grievanceId} is RESOLVED. ---`);
+            console.log(`Please verify the fix at: http://localhost:5173/city-pulse`);
+
+            // FEEDBACK LOOP (Industrial Learning System)
+            // If resolving a high-priority issue quickly, we reinforce the priority engine's weights.
+            if (grievance.priorityScore > 100) {
+                console.log(`[LEARNING_SYSTEM] Feedback reinforcement: Priority formula validated for ${grievance.category}.`);
+                // In a production app, we would update a 'ModelWeight' collection here.
+            }
         }
 
         res.json(grievance);
@@ -105,9 +167,20 @@ export const verifyFix = async (req, res) => {
         grievance.lastHash = blockData.currentHash;
         await grievance.save();
 
+        // --- NEW: Gamification System ---
+        // Award credit points to the user who verified the fix
+        if (grievance.originalReporter) {
+            const user = await User.findById(grievance.originalReporter);
+            if (user) {
+                user.scoreCredit += 50; // Award 50 points
+                await user.save();
+            }
+        }
+        // -------------------------------
+
         await AuditLog.create(blockData);
 
-        res.json({ message: 'Grievance archived successfully', grievance });
+        res.json({ message: 'Grievance archived successfully and credit points awarded', grievance });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -142,6 +215,7 @@ export const getGrievances = async (req, res) => {
         const grievances = await Grievance.find({}).sort({ createdAt: -1 });
         res.json(grievances);
     } catch (error) {
+        console.error("GET_GRIEVANCES_ERROR:", error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -161,32 +235,55 @@ export const getGrievanceById = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-// @desc    Submit feedback by original reporter
-// @route   PUT /api/grievances/:id/feedback
-// @access  Private
-export const submitFeedback = async (req, res) => {
+// @desc    Get Department-wise metrics
+// @route   GET /api/grievances/stats/departments
+// @access  Private/Admin
+export const getDepartmentStats = async (req, res) => {
     try {
-        const { feedback, comment } = req.body;
+        const stats = await Grievance.aggregate([
+            {
+                $group: {
+                    _id: "$department",
+                    count: { $sum: 1 },
+                    resolved: {
+                        $sum: { $cond: [{ $eq: ["$status", "Resolved"] }, 1, 0] }
+                    },
+                    pending: {
+                        $sum: { $cond: [{ $eq: ["$status", "Reported"] }, 1, 0] }
+                    }
+                }
+            }
+        ]);
+        res.json(stats);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Review Resolution (Citizen Feedback Loop)
+// @route   PUT /api/grievances/:id/review
+// @access  Private
+export const reviewResolution = async (req, res) => {
+    try {
+        const { satisfaction, comment } = req.body;
         const grievance = await Grievance.findOne({ grievanceId: req.params.id });
 
-        if (!grievance) {
-            return res.status(404).json({ message: 'Grievance not found' });
-        }
+        if (!grievance) return res.status(404).json({ message: "Grievance not found" });
 
-        grievance.citizenFeedback = feedback;
+        grievance.citizenFeedback = satisfaction ? 'Resolved' : 'Not Resolved';
         grievance.feedbackComment = comment;
 
-        // If user says 'Resolved', we can archive it
-        if (feedback === 'Resolved') {
+        if (satisfaction) {
             grievance.status = 'Archived';
-            const blockData = createBlockData(grievance._id, 'Citizen Confirmed Resolution', grievance.lastHash);
-            grievance.lastHash = blockData.currentHash;
-            await AuditLog.create(blockData);
+        } else {
+            // Re-open if citizen rejects the fix
+            grievance.status = 'Reported';
+            grievance.priorityScore += 50; // Bump priority due to failed fix
         }
 
         await grievance.save();
-        res.json({ message: 'Feedback submitted successfully', grievance });
+        res.json({ message: "Review processed", grievance });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
-};
+}

@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 import grievanceRoutes from './routes/grievanceRoutes.js';
 import newsRoutes from './routes/newsRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 dotenv.config();
@@ -13,6 +14,14 @@ const startServer = async () => {
     const app = express();
     app.use(cors());
     app.use(express.json());
+
+    // Diagnostic Logger
+    app.use((req, res, next) => {
+        console.log(`${req.method} ${req.originalUrl}`);
+        next();
+    });
+
+    app.get('/api/ping', (req, res) => res.json({ status: 'Asha Neural Bridge active' }));
 
     try {
         await connectDB();
@@ -23,6 +32,7 @@ const startServer = async () => {
     app.use('/api/grievances', grievanceRoutes);
     app.use('/api/news', newsRoutes);
     app.use('/api/users', userRoutes);
+    app.use('/api/ai', aiRoutes);
 
     app.use(notFound);
     app.use(errorHandler);

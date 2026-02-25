@@ -7,7 +7,8 @@ const TripleHeader = ({ isFixed = true }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const navItems = [
-        { name: 'The Corporation', path: '#' },
+        { name: 'The Corporation', path: '/corp-login' },
+        { name: 'Urban Nervous System', path: '/corp-login' },
         { name: 'Online Services', path: '#' },
         { name: 'City Pulse', path: '/city-pulse' },
         { name: 'Portal Login', path: '/login' },

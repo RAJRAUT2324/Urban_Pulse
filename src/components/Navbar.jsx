@@ -5,11 +5,12 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
     const menuItems = [
-        { name: 'Corporation', hasChild: true },
+        { name: 'Corporation', hasChild: false, path: '/corp-login' },
         { name: 'Services', hasChild: true },
         { name: 'Departments', hasChild: true },
         { name: 'About Pune', hasChild: false },
         { name: 'News & Events', hasChild: false },
+        { name: 'Urban Seva', hasChild: false, path: '/urban-seva' },
         { name: 'City Pulse', hasChild: false, path: '/city-pulse' },
         { name: 'Login', hasChild: false, path: '/login' },
         { name: 'Contact', hasChild: false },
@@ -62,7 +63,7 @@ const Navbar = () => {
             </div>
 
             {/* Blue Accent Line */}
-            <div className="h-1 w-full bg-gradient-to-r from-pmc-blue via-pmc-orange to-pmc-blue"></div>
+            <div className="h-1 w-full bg-linear-to-r from-pmc-blue via-pmc-orange to-pmc-blue"></div>
         </nav>
     );
 };

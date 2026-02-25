@@ -5,7 +5,9 @@ import {
     getGrievanceById,
     updateGrievanceStatus,
     verifyFix,
-    getNearbyValidators
+    getNearbyValidators,
+    getDepartmentStats,
+    reviewResolution
 } from '../controllers/grievanceController.js';
 
 const router = express.Router();
@@ -13,6 +15,9 @@ const router = express.Router();
 router.route('/')
     .post(submitGrievance)
     .get(getGrievances);
+
+router.route('/stats/departments')
+    .get(getDepartmentStats);
 
 router.route('/:id')
     .get(getGrievanceById);
@@ -26,8 +31,8 @@ router.route('/:id/verify')
 router.route('/:id/nearby-validators')
     .get(getNearbyValidators);
 
-router.route('/:id/feedback')
-    .put(submitFeedback);
+router.route('/:id/review')
+    .put(reviewResolution);
 
 export default router;
 

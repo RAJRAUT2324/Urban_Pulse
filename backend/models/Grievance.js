@@ -16,6 +16,18 @@ const grievanceSchema = mongoose.Schema({
         enum: ['Reported', 'AI Classified', 'Force Assigned', 'Blockchain Verified', 'Pending Verification', 'Resolved', 'Archived'],
         default: 'Reported'
     },
+    department: {
+        type: String,
+        enum: ['Roads', 'Water', 'Electricity', 'Waste Management', 'Public Health', 'Other'],
+        default: 'Other'
+    },
+    priorityScore: { type: Number, default: 0 },
+    aiAnalysis: {
+        rootCause: { type: String },
+        structuralHealth: { type: Number }, // 0-100
+        historicalFrequency: { type: Number },
+        contextEscalation: { type: Boolean, default: false }
+    },
     grievanceId: { type: String, required: true, unique: true },
     proofUrl: { type: String },
     lastHash: { type: String },
