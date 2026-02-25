@@ -8,7 +8,8 @@ import {
     LogOut,
     Zap,
     ChevronRight,
-    Shield
+    Shield,
+    Heart
 } from 'lucide-react';
 
 const CorpSidebar = ({ activeTab, setActiveTab, role }) => {
@@ -17,6 +18,7 @@ const CorpSidebar = ({ activeTab, setActiveTab, role }) => {
         { id: 'GRIEVANCES', icon: <ClipboardList size={20} />, label: 'Grievances', roles: ['Admin', 'Officer'] },
         { id: 'DEPARTMENTS', icon: <Users size={20} />, label: 'Departments', roles: ['Admin'] },
         { id: 'NERVOUS_SYSTEM', icon: <BrainCircuit size={20} />, label: 'Urban AI (CNS)', roles: ['Admin', 'Engineer'] },
+        { id: 'IMPACT', icon: <Heart size={20} />, label: 'Citizen Impact', roles: ['Admin', 'Officer'] },
         { id: 'SETTINGS', icon: <Settings size={20} />, label: 'Control Center', roles: ['Admin'] },
     ];
 

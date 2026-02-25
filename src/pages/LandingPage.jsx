@@ -7,6 +7,7 @@ import AppBanner from '../sections/AppBanner';
 import LatestUpdates from '../sections/LatestUpdates';
 import UrbanPulseForCitizen from '../sections/UrbanPulseForCitizen';
 import MayorMessage from '../sections/MayorMessage';
+import WeeklyPoll from '../components/WeeklyPoll';
 import SmartCityPulse from '../sections/SmartCityPulse';
 import Footer from '../components/Footer';
 import AshaAgent from '../components/AshaAgent';
@@ -48,6 +49,9 @@ const LandingPage = () => {
 
                 {/* Leadership Message Section */}
                 <MayorMessage />
+
+                {/* NEW: Weekly Civic Decision Poll */}
+                <WeeklyPoll />
 
                 {/* Technology Showcase (Digital Twin) - Matches UrbanPulse topic */}
                 <SmartCityPulse />

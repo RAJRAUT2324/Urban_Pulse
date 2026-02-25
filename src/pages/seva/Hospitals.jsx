@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Hospital, MapPin, Phone, Clock, ShieldCheck, HeartPulse, Activity, ChevronRight } from 'lucide-react';
+import DeptServices from '../../components/DeptServices';
 
 const Hospitals = () => {
     const amravatiHospitals = [
@@ -93,6 +94,10 @@ const Hospitals = () => {
                                     </div>
                                 ))}
                             </div>
+                        </div>
+
+                        <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
+                            <DeptServices category="healthcare" />
                         </div>
 
                         <div className="bg-linear-to-br from-pmc-blue to-pmc-accent p-8 rounded-[2.5rem] text-white shadow-xl">

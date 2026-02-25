@@ -2,6 +2,7 @@ import Grievance from '../models/Grievance.js';
 import AuditLog from '../models/AuditLog.js';
 import User from '../models/User.js';
 import Asset from '../models/Asset.js';
+import CivicCredits from '../models/CivicCredits.js';
 import { createBlockData } from '../utils/ledgerUtils.js';
 
 // --- HELPER: AI Priority Calculation ---
@@ -172,8 +173,30 @@ export const verifyFix = async (req, res) => {
         if (grievance.originalReporter) {
             const user = await User.findById(grievance.originalReporter);
             if (user) {
-                user.scoreCredit += 50; // Award 50 points
+                user.scoreCredit += 50; // Legacy score
                 await user.save();
+
+                // ADDITIVE: Purpose-Locked Civic Credits
+                let civicCredits = await CivicCredits.findOne({ userId: user._id });
+                if (!civicCredits) {
+                    civicCredits = new CivicCredits({ userId: user._id });
+                }
+
+                const amount = 10; // 10 credits per verification
+                civicCredits.totalCredits += amount;
+
+                // Purpose Lock Split: 40% Tax, 30% Health, 30% Voting
+                civicCredits.lockedCredits.taxUtility += amount * 0.4;
+                civicCredits.lockedCredits.healthcare += amount * 0.3;
+                civicCredits.lockedCredits.developmentVoting += amount * 0.3;
+
+                civicCredits.history.push({
+                    reason: 'Verified fix for complaint',
+                    credits: amount,
+                    complaintId: grievance.grievanceId
+                });
+
+                await civicCredits.save();
             }
         }
         // -------------------------------

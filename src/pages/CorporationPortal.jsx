@@ -14,6 +14,7 @@ import CorpHeader from '../components/corp/CorpHeader';
 import DepartmentGrid from '../components/corp/DepartmentGrid';
 import GrievanceTable from '../components/corp/GrievanceTable';
 import UrbanNervousSystem from '../components/UrbanNervousSystem';
+import ImpactDashboard from '../components/corp/ImpactDashboard';
 
 const CorporationPortal = () => {
     const [activeTab, setActiveTab] = useState('DASHBOARD');
@@ -224,6 +225,17 @@ const CorporationPortal = () => {
                             exit={{ opacity: 0, scale: 1.05 }}
                         >
                             <UrbanNervousSystem grievances={filteredGrievances} />
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'IMPACT' && (
+                        <motion.div
+                            key="impact"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                        >
+                            <ImpactDashboard />
                         </motion.div>
                     )}
                 </AnimatePresence>

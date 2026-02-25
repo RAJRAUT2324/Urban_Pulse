@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CreditCard, History, Calculator, ShieldCheck, Landmark, Receipt, ArrowRight } from 'lucide-react';
+import DeptServices from '../../components/DeptServices';
 
 const PropertyTax = () => {
     return (
@@ -92,6 +93,10 @@ const PropertyTax = () => {
                                     <div className="h-1 bg-white/5 rounded-full" />
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100">
+                            <DeptServices category="utility" />
                         </div>
 
                         <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 flex flex-col items-center text-center">

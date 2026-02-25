@@ -15,6 +15,7 @@ const ProfilePage = () => {
         address: '',
         password: '',
     });
+    const [credits, setCredits] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -28,6 +29,7 @@ const ProfilePage = () => {
             navigate('/login');
         } else {
             fetchProfile(userInfo.token);
+            fetchCredits(userInfo.token);
         }
     }, [navigate]);
 
@@ -47,9 +49,25 @@ const ProfilePage = () => {
                 address: data.address || '',
                 password: '',
             });
-            setLoading(false);
         } catch (err) {
             setError('Failed to fetch profile');
+        } finally {
+            if (credits !== null) setLoading(false);
+        }
+    };
+
+    const fetchCredits = async (token) => {
+        try {
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+            const { data } = await axios.get('http://127.0.0.1:5000/api/impact/credits', config);
+            setCredits(data);
+        } catch (err) {
+            console.error("Failed to fetch credits");
+        } finally {
             setLoading(false);
         }
     };
@@ -114,13 +132,29 @@ const ProfilePage = () => {
 
                                     <div className="w-full h-px bg-white/10 my-8" />
 
-                                    <div className="w-full space-y-4">
+                                    <div className="w-full space-y-6">
                                         <div className="flex justify-between items-center text-xs">
-                                            <span className="text-white/40 font-black uppercase tracking-widest">Trust Score</span>
-                                            <span className="font-black text-pmc-accent">{user?.scoreCredit}</span>
+                                            <span className="text-white/40 font-black uppercase tracking-widest">Trust Signal</span>
+                                            <span className="font-black text-pmc-accent uppercase tracking-tighter">
+                                                {credits?.totalCredits > 500 ? "Elite Importer" : (credits?.totalCredits > 100 ? "Verified Citizen" : "New Activist")}
+                                            </span>
                                         </div>
-                                        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-pmc-accent" style={{ width: `${Math.min((user?.scoreCredit || 0) / 10, 100)}%` }} />
+
+                                        <div className="grid grid-cols-1 gap-4 text-left">
+                                            <div className="p-4 rounded-2xl glass-dark border-white/5">
+                                                <p className="text-[10px] text-white/40 font-black uppercase tracking-widest mb-1">Impact Credits</p>
+                                                <p className="text-2xl font-black text-white leading-none">{credits?.totalCredits || 0} ✅</p>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between text-[9px] font-black uppercase tracking-widest">
+                                                    <span className="text-white/40">Voting Power</span>
+                                                    <span className="text-pmc-saffron">{credits?.lockedCredits.developmentVoting || 0}</span>
+                                                </div>
+                                                <div className="w-full h-1 bg-white/5 rounded-full">
+                                                    <div className="h-full bg-pmc-saffron" style={{ width: `${Math.min((credits?.lockedCredits.developmentVoting || 0) * 10, 100)}%` }} />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

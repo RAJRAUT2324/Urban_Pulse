@@ -21,8 +21,10 @@ import {
     Bell
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import CitizenImpactPanel from './citizen/CitizenImpactPanel';
 
 const CitizenDashboard = () => {
+    const [activeTab, setActiveTab] = useState('REPORTS'); // REPORTS, IMPACT_HUB
     const [grievances, setGrievances] = useState([]);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -128,10 +130,10 @@ const CitizenDashboard = () => {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <button onClick={() => navigate('/profile')} className="btn-primary w-full text-[10px] py-3.5">
-                                    Profile Settings
+                                <button onClick={() => setActiveTab('IMPACT_HUB')} className="btn-primary w-full text-[10px] py-3.5">
+                                    Impact Hub
                                 </button>
-                                <button onClick={() => navigate('/')} className="glass-dark border-white/10 w-full rounded-2xl py-3.5 font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all">
+                                <button onClick={() => { setActiveTab('REPORTS'); navigate('/'); }} className="glass-dark border-white/10 w-full rounded-2xl py-3.5 font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all">
                                     Report Issue
                                 </button>
                             </div>
@@ -164,89 +166,95 @@ const CitizenDashboard = () => {
             {/* Main Content Grid */}
             <div className="grid lg:grid-cols-3 gap-12">
                 <div className="lg:col-span-2 space-y-8">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-3xl font-black text-pmc-blue tracking-tighter">Active Reports</h2>
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200">
-                            <div className="w-1.5 h-1.5 rounded-full bg-pmc-orange" />
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{pending.length} Open</span>
-                        </div>
-                    </div>
-
-                    <div className="space-y-6">
-                        <AnimatePresence mode="popLayout">
-                            {pending.map((g, i) => (
-                                <motion.div
-                                    layout
-                                    key={g.grievanceId}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    className="premium-card p-8 bg-white group hover:shadow-2xl transition-all duration-700"
-                                >
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
-                                        <div className="flex items-start gap-6">
-                                            <div className="w-16 h-16 glass-effect bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-pmc-blue transition-colors relative overflow-hidden shrink-0">
-                                                <div className="absolute inset-0 bg-pmc-blue/0 group-hover:bg-pmc-blue/5 transition-colors" />
-                                                <Bell size={24} />
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center gap-4 mb-3">
-                                                    <span className="text-xl font-black text-pmc-blue tracking-tight">#{g.grievanceId}</span>
-                                                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${g.status === 'Resolved' ? 'bg-green-100 text-green-700' : 'bg-pmc-orange/10 text-pmc-orange'
-                                                        }`}>
-                                                        {g.status}
-                                                    </span>
-                                                </div>
-                                                <div className="flex flex-wrap items-center gap-4 text-slate-500 font-bold text-[11px] mb-4">
-                                                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded text-slate-600 uppercase">
-                                                        {g.category}
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <MapPin size={14} className="text-pmc-accent" />
-                                                        {g.location}
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <ShieldCheck size={14} className="text-pmc-accent" />
-                                                    <p className="text-[10px] text-slate-400 font-mono tracking-tight">Verified Pulse ID: {g.lastHash?.substring(0, 16)}...</p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="shrink-0">
-                                            {g.status === 'Resolved' ? (
-                                                <button
-                                                    onClick={() => handleVerify(g.grievanceId)}
-                                                    className="btn-pmc-accent w-full flex items-center justify-center gap-3"
-                                                >
-                                                    Verify Resolution <ChevronRight size={18} />
-                                                </button>
-                                            ) : (
-                                                <div className="px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-center min-w-[200px]">
-                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Current Phase</p>
-                                                    <p className="text-sm font-black text-pmc-blue">Processing Ledger</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-
-                        {pending.length === 0 && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="p-20 text-center premium-card bg-slate-50/50 border-dashed border-slate-200"
-                            >
-                                <div className="w-20 h-20 bg-white shadow-xl rounded-full flex items-center justify-center mx-auto mb-8 border border-slate-100">
-                                    <CheckCircle size={40} className="text-pmc-accent" />
+                    {activeTab === 'REPORTS' ? (
+                        <>
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-3xl font-black text-pmc-blue tracking-tighter">Active Reports</h2>
+                                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-pmc-orange" />
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{pending.length} Open</span>
                                 </div>
-                                <h3 className="text-2xl font-black text-pmc-blue mb-2 tracking-tight">Clean Ledger</h3>
-                                <p className="text-slate-500 font-medium">All your reports have been successfully audited and resolved.</p>
-                            </motion.div>
-                        )}
-                    </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <AnimatePresence mode="popLayout">
+                                    {pending.map((g, i) => (
+                                        <motion.div
+                                            layout
+                                            key={g.grievanceId}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: i * 0.05 }}
+                                            className="premium-card p-8 bg-white group hover:shadow-2xl transition-all duration-700"
+                                        >
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
+                                                <div className="flex items-start gap-6">
+                                                    <div className="w-16 h-16 glass-effect bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-pmc-blue transition-colors relative overflow-hidden shrink-0">
+                                                        <div className="absolute inset-0 bg-pmc-blue/0 group-hover:bg-pmc-blue/5 transition-colors" />
+                                                        <Bell size={24} />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-4 mb-3">
+                                                            <span className="text-xl font-black text-pmc-blue tracking-tight">#{g.grievanceId}</span>
+                                                            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${g.status === 'Resolved' ? 'bg-green-100 text-green-700' : 'bg-pmc-orange/10 text-pmc-orange'
+                                                                }`}>
+                                                                {g.status}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex flex-wrap items-center gap-4 text-slate-500 font-bold text-[11px] mb-4">
+                                                            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded text-slate-600 uppercase">
+                                                                {g.category}
+                                                            </div>
+                                                            <div className="flex items-center gap-1.5">
+                                                                <MapPin size={14} className="text-pmc-accent" />
+                                                                {g.location}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <ShieldCheck size={14} className="text-pmc-accent" />
+                                                            <p className="text-[10px] text-slate-400 font-mono tracking-tight">Verified Pulse ID: {g.lastHash?.substring(0, 16)}...</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="shrink-0">
+                                                    {g.status === 'Resolved' ? (
+                                                        <button
+                                                            onClick={() => handleVerify(g.grievanceId)}
+                                                            className="btn-pmc-accent w-full flex items-center justify-center gap-3"
+                                                        >
+                                                            Verify Resolution <ChevronRight size={18} />
+                                                        </button>
+                                                    ) : (
+                                                        <div className="px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-center min-w-[200px]">
+                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Current Phase</p>
+                                                            <p className="text-sm font-black text-pmc-blue">Processing Ledger</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+
+                                {pending.length === 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="p-20 text-center premium-card bg-slate-50/50 border-dashed border-slate-200"
+                                    >
+                                        <div className="w-20 h-20 bg-white shadow-xl rounded-full flex items-center justify-center mx-auto mb-8 border border-slate-100">
+                                            <CheckCircle size={40} className="text-pmc-accent" />
+                                        </div>
+                                        <h3 className="text-2xl font-black text-pmc-blue mb-2 tracking-tight">Clean Ledger</h3>
+                                        <p className="text-slate-500 font-medium">All your reports have been successfully audited and resolved.</p>
+                                    </motion.div>
+                                )}
+                            </div>
+                        </>
+                    ) : (
+                        <CitizenImpactPanel />
+                    )}
                 </div>
 
                 <div className="space-y-8">
@@ -367,5 +375,3 @@ const CitizenDashboard = () => {
 };
 
 export default CitizenDashboard;
-
-
