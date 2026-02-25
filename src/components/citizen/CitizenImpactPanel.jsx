@@ -20,11 +20,12 @@ const CitizenImpactPanel = () => {
     useEffect(() => {
         const fetchCredits = async () => {
             try {
-                // Assuming local storage has user info or auth middleware handles it
-                const res = await fetch('http://localhost:5000/api/impact/credits', {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                if (!userInfo || !userInfo.token) return;
+
+                const res = await fetch('/api/impact/credits', {
                     headers: {
-                        // Mocking token for now if dev mode, otherwise use actual
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Authorization': `Bearer ${userInfo.token}`
                     }
                 });
                 const data = await res.json();
@@ -46,19 +47,19 @@ const CitizenImpactPanel = () => {
 
     const handleVote = async (option) => {
         try {
-            const res = await fetch('http://localhost:5000/api/impact/vote', {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const res = await fetch('/api/impact/vote', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${userInfo.token}`
                 },
                 body: JSON.stringify({ wardId: 'WARD_P04', option })
             });
             if (res.ok) {
-                const updated = await res.json();
                 // Refresh credit data
-                const cRes = await fetch('http://localhost:5000/api/impact/credits', {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                const cRes = await fetch('/api/impact/credits', {
+                    headers: { 'Authorization': `Bearer ${userInfo.token}` }
                 });
                 const cData = await cRes.json();
                 setCredits(cData);
@@ -69,6 +70,35 @@ const CitizenImpactPanel = () => {
             }
         } catch (error) {
             console.error("Voting failed", error);
+        }
+    };
+
+    const handleInvest = async (category, serviceName, amount = 1) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const res = await fetch('/api/impact/spend', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${userInfo.token}`
+                },
+                body: JSON.stringify({ category, serviceName, amount })
+            });
+
+            if (res.ok) {
+                // Refresh
+                const cRes = await fetch('/api/impact/credits', {
+                    headers: { 'Authorization': `Bearer ${userInfo.token}` }
+                });
+                const cData = await cRes.json();
+                setCredits(cData);
+                alert(`Successfully invested ${amount} credit in ${serviceName}!`);
+            } else {
+                const err = await res.json();
+                alert(err.message);
+            }
+        } catch (error) {
+            console.error("Investment failed", error);
         }
     };
 
@@ -117,23 +147,34 @@ const CitizenImpactPanel = () => {
                             {/* Purpose Locked Credits */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {[
-                                    { label: 'Tax Utility', sub: 'Property & Water', val: credits?.lockedCredits?.taxUtility, icon: <Activity className="text-blue-500" /> },
-                                    { label: 'Healthcare', sub: 'Clinic Subsidies', val: credits?.lockedCredits?.healthcare, icon: <ShieldCheck className="text-green-500" /> },
-                                    { label: 'Ward Voting', sub: 'Dev Priority', val: credits?.lockedCredits?.developmentVoting, icon: <Vote className="text-pmc-accent" /> }
+                                    { key: 'taxUtility', label: 'Tax Utility', sub: 'Property & Water', val: credits?.lockedCredits?.taxUtility, icon: <Activity className="text-blue-500" /> },
+                                    { key: 'healthcare', label: 'Healthcare', sub: 'Clinic Subsidies', val: credits?.lockedCredits?.healthcare, icon: <ShieldCheck className="text-green-500" />, action: () => handleInvest('healthcare', 'Local Clinic Subsidy') },
+                                    { key: 'developmentVoting', label: 'Ward Voting', sub: 'Dev Priority', val: credits?.lockedCredits?.developmentVoting, icon: <Vote className="text-pmc-accent" />, action: () => setActiveTab('VOTING') }
                                 ].map((box, i) => (
-                                    <div key={i} className="bg-slate-50 border border-slate-100 p-6 rounded-3xl group hover:border-pmc-accent/30 transition-all">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="p-3 bg-white rounded-2xl shadow-sm">{box.icon}</div>
-                                            <Lock size={12} className="text-slate-300" />
+                                    <div key={i} className="bg-slate-50 border border-slate-100 p-6 rounded-3xl group hover:border-pmc-accent/30 transition-all flex flex-col justify-between">
+                                        <div>
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="p-3 bg-white rounded-2xl shadow-sm">{box.icon}</div>
+                                                <Lock size={12} className="text-slate-300" />
+                                            </div>
+                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{box.label}</h4>
+                                            <p className="text-2xl font-black text-slate-800 tracking-tight">{box.val || 0} <span className="text-xs text-slate-400 font-bold">PTS</span></p>
+                                            <p className="text-[8px] text-slate-400 font-bold uppercase mt-2">{box.sub}</p>
                                         </div>
-                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{box.label}</h4>
-                                        <p className="text-2xl font-black text-slate-800 tracking-tight">{box.val || 0} <span className="text-xs text-slate-400 font-bold">PTS</span></p>
-                                        <p className="text-[8px] text-slate-400 font-bold uppercase mt-2">{box.sub}</p>
+                                        {box.action && (
+                                            <button
+                                                onClick={box.action}
+                                                className="mt-6 w-full py-3 bg-white border border-slate-200 rounded-xl text-[9px] font-black uppercase tracking-widest text-pmc-blue hover:bg-pmc-blue hover:text-white transition-all shadow-sm flex items-center justify-center gap-2 group/btn"
+                                            >
+                                                {box.key === 'healthcare' ? 'Invest Credits' : 'Vote Now'}
+                                                <ChevronRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />
+                                            </button>
+                                        )}
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="p-6 bg-orange-50 border border-orange-100 rounded-[2rem] flex items-center gap-5">
+                            <div className="p-6 bg-orange-50 border border-orange-100 rounded-4xl flex items-center gap-5">
                                 <Zap className="text-orange-500" size={24} />
                                 <div>
                                     <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">Digital Constraint Notice</p>

@@ -70,8 +70,8 @@ const CitizenDashboard = () => {
         }
 
         try {
-            await axios.put(`/api/grievances/${feedbackModal}/feedback`, {
-                feedback: feedbackValue,
+            await axios.put(`/api/grievances/${feedbackModal}/review`, {
+                satisfaction: feedbackValue === 'Resolved',
                 comment: feedbackComment
             });
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));

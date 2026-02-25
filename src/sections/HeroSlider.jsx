@@ -6,14 +6,14 @@ import { Link } from 'react-router-dom';
 const HeroSlider = () => {
     const slides = [
         {
-            image: "https://images.unsplash.com/photo-1542601906990-b4d3fb773b09?q=80&w=2613&auto=format&fit=crop",
+            image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=2000&auto=format&fit=crop",
             title: "Reimagining Pune with AI-Driven Governance",
             description: "Empowering citizens through real-time feedback loops and blockchain-verified structural improvements.",
             cta: "Report Issue",
             accent: "pmc-accent"
         },
         {
-            image: "https://images.unsplash.com/photo-1574068461719-79854a61f52d?q=80&w=2000&auto=format&fit=crop",
+            image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=2000&auto=format&fit=crop",
             title: "Transparency in Every Transition",
             description: "Track your reports on an immutable ledger. 100% accountability, zero bureaucracy.",
             cta: "Explore Ledger",

@@ -298,6 +298,38 @@ export const reviewResolution = async (req, res) => {
 
         if (satisfaction) {
             grievance.status = 'Archived';
+
+            // --- Gamification System (Credit Awarding) ---
+            if (grievance.originalReporter) {
+                const user = await User.findById(grievance.originalReporter);
+                if (user) {
+                    user.scoreCredit += 50; // Legacy score
+                    await user.save();
+
+                    // ADDITIVE: Purpose-Locked Civic Credits
+                    let civicCredits = await CivicCredits.findOne({ userId: user._id });
+                    if (!civicCredits) {
+                        civicCredits = new CivicCredits({ userId: user._id });
+                    }
+
+                    const amount = 10; // 10 credits per verification
+                    civicCredits.totalCredits += amount;
+
+                    // Purpose Lock Split: 40% Tax, 30% Health, 30% Voting
+                    civicCredits.lockedCredits.taxUtility += amount * 0.4;
+                    civicCredits.lockedCredits.healthcare += amount * 0.3;
+                    civicCredits.lockedCredits.developmentVoting += amount * 0.3;
+
+                    civicCredits.history.push({
+                        reason: 'Verified fix for complaint (Review Loop)',
+                        credits: amount,
+                        complaintId: grievance.grievanceId
+                    });
+
+                    await civicCredits.save();
+                }
+            }
+            // ----------------------------------------------
         } else {
             // Re-open if citizen rejects the fix
             grievance.status = 'Reported';
