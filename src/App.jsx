@@ -13,13 +13,16 @@ import GrievanceRedressal from './pages/seva/GrievanceRedressal';
 import GarbageCollection from './pages/seva/GarbageCollection';
 import TheaterArt from './pages/seva/TheaterArt';
 import Crematoriums from './pages/seva/Crematoriums';
-import OnlineServices from './pages/seva/OnlineServices';
+import TransparencyPortal from './pages/TransparencyPortal';
 import PropertyTax from './pages/seva/PropertyTax';
 import PublicTransport from './pages/seva/PublicTransport';
 import Recruitment from './pages/seva/Recruitment';
 import Gardens from './pages/seva/Gardens';
+import HelpContact from './pages/HelpContact';
+import EmergencyPortal from './pages/EmergencyPortal';
 
 import Navbar from './components/Navbar';
+import FloatingAnnouncement from './components/FloatingAnnouncement';
 
 function App() {
   return (
@@ -38,12 +41,15 @@ function App() {
           <Route path="/urban-seva/garbage" element={<GarbageCollection />} />
           <Route path="/urban-seva/theater-art" element={<TheaterArt />} />
           <Route path="/urban-seva/crematoriums" element={<Crematoriums />} />
-          <Route path="/urban-seva/online-services" element={<OnlineServices />} />
+          <Route path="/transparency-portal" element={<TransparencyPortal />} />
           <Route path="/urban-seva/property-tax" element={<PropertyTax />} />
           <Route path="/urban-seva/transport" element={<PublicTransport />} />
           <Route path="/urban-seva/recruitment" element={<Recruitment />} />
           <Route path="/urban-seva/gardens" element={<Gardens />} />
+          <Route path="/help-contact" element={<HelpContact />} />
+          <Route path="/emergency-portal" element={<EmergencyPortal />} />
         </Routes>
+        <FloatingAnnouncement />
       </div>
     </Router>
 

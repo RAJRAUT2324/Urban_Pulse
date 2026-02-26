@@ -38,7 +38,9 @@ const Footer = () => {
                     <div className="space-y-6">
                         <h5 className="text-sm font-black text-pmc-blue uppercase tracking-[0.2em] border-l-4 border-pmc-saffron pl-4">Services</h5>
                         <ul className="space-y-3 font-bold text-[13px] text-gray-500">
-                            <li className="hover:text-pmc-blue cursor-pointer transition-colors">Online Services</li>
+                            <li className="hover:text-pmc-blue cursor-pointer transition-colors" onClick={() => window.location.href = '/transparency-portal'}>Transparency Portal</li>
+                            <li className="hover:text-pmc-blue cursor-pointer transition-colors" onClick={() => window.location.href = '/help-contact'}>Help</li>
+                            <li className="hover:text-pmc-blue cursor-pointer transition-colors" onClick={() => window.location.href = '/help-contact?tab=contact'}>Contact</li>
                             <li className="hover:text-pmc-blue cursor-pointer transition-colors">UrbanPulse Care</li>
                             <li className="hover:text-pmc-blue cursor-pointer transition-colors">Digital Apps</li>
                         </ul>

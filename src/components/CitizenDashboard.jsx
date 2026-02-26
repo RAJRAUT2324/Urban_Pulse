@@ -27,6 +27,7 @@ const CitizenDashboard = () => {
     const [activeTab, setActiveTab] = useState('REPORTS'); // REPORTS, IMPACT_HUB
     const [grievances, setGrievances] = useState([]);
     const [user, setUser] = useState(null);
+    const [credits, setCredits] = useState(null);
     const [loading, setLoading] = useState(true);
     const [feedbackModal, setFeedbackModal] = useState(null);
     const [feedbackValue, setFeedbackValue] = useState('');
@@ -45,13 +46,15 @@ const CitizenDashboard = () => {
     const fetchData = async (token) => {
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const [grievanceRes, userRes] = await Promise.all([
+            const [grievanceRes, userRes, creditRes] = await Promise.all([
                 axios.get('/api/grievances'),
-                axios.get('/api/users/profile', config)
+                axios.get('/api/users/profile', config),
+                axios.get('/api/impact/credits', config)
             ]);
 
             setGrievances(Array.isArray(grievanceRes.data) ? grievanceRes.data : []);
             setUser(userRes.data);
+            setCredits(creditRes.data);
             setLoading(false);
         } catch (err) {
             console.error("Error fetching dashboard data:", err);
@@ -98,7 +101,7 @@ const CitizenDashboard = () => {
         { label: "Total Reports", value: grievances.length, icon: <Activity size={20} />, color: "pmc-blue" },
         { label: "Active Tickets", value: pending.length, icon: <Clock size={20} />, color: "pmc-orange" },
         { label: "Success Rate", value: grievances.length ? Math.round((resolvedCount / grievances.length) * 100) + "%" : "0%", icon: <CheckCircle size={20} />, color: "pmc-accent" },
-        { label: "Impact Credits", value: user?.scoreCredit || 0, icon: <Award size={20} />, color: "pmc-saffron" },
+        { label: "Impact Credits", value: credits?.totalCredits || 0, icon: <Award size={20} />, color: "pmc-saffron" },
     ];
 
     return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { User, Mail, Phone, MapPin, Award, Edit2, Save, X, LogOut, ShieldCheck, ChevronRight, Hash } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Award, Edit2, Save, X, LogOut, ShieldCheck, ChevronRight, Hash, TrendingUp, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TripleHeader from '../components/TripleHeader';
 
@@ -40,7 +40,7 @@ const ProfilePage = () => {
                     Authorization: `Bearer ${token}`,
                 },
             };
-            const { data } = await axios.get('http://127.0.0.1:5000/api/users/profile', config);
+            const { data } = await axios.get('/api/users/profile', config);
             setUser(data);
             setFormData({
                 name: data.name,
@@ -63,7 +63,7 @@ const ProfilePage = () => {
                     Authorization: `Bearer ${token}`,
                 },
             };
-            const { data } = await axios.get('http://127.0.0.1:5000/api/impact/credits', config);
+            const { data } = await axios.get('/api/impact/credits', config);
             setCredits(data);
         } catch (err) {
             console.error("Failed to fetch credits");
@@ -84,7 +84,7 @@ const ProfilePage = () => {
                     Authorization: `Bearer ${userInfo.token}`,
                 },
             };
-            const { data } = await axios.put('http://127.0.0.1:5000/api/users/profile', formData, config);
+            const { data } = await axios.put('/api/users/profile', formData, config);
             setUser(data);
             localStorage.setItem('userInfo', JSON.stringify({ ...userInfo, ...data }));
             setIsEditing(false);
@@ -330,11 +330,54 @@ const ProfilePage = () => {
                                     <div>
                                         <h4 className="text-2xl font-black tracking-tighter mb-2">PMC Elite Citizen Program</h4>
                                         <p className="text-slate-400 font-medium text-sm leading-relaxed">
-                                            You are currently at <span className="text-pmc-saffron font-black">Level {Math.floor((user?.scoreCredit || 0) / 100) + 1}</span>. Keep reporting issues and verifying resolutions to earn more impact credits and unlock exclusive city benefits.
+                                            You are currently at <span className="text-pmc-saffron font-black">Level {Math.floor((credits?.totalCredits || 0) / 100) + 1}</span>. Keep reporting issues and verifying resolutions to earn more impact credits and unlock exclusive city benefits.
                                         </p>
                                     </div>
                                 </div>
                             </motion.div>
+
+                            {/* Civic Impact History Section */}
+                            <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
+                                <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                    <div>
+                                        <h3 className="text-xl font-black text-pmc-blue tracking-tighter flex items-center gap-3">
+                                            <History className="text-slate-400" size={24} />
+                                            Civic Contribution History
+                                        </h3>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Verified Ledger of Impact</p>
+                                    </div>
+                                    <Award className="text-pmc-accent" size={24} />
+                                </div>
+                                <div className="p-8 space-y-4">
+                                    {credits?.history?.length > 0 ? (
+                                        credits.history.slice().reverse().map((item, i) => (
+                                            <div key={i} className="flex items-center justify-between p-5 bg-slate-50 border border-slate-100 rounded-2xl group hover:border-pmc-blue/30 transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`p-3 rounded-xl ${item.credits > 0 ? 'bg-green-100 text-green-600' : 'bg-pmc-blue/10 text-pmc-blue'}`}>
+                                                        {item.credits > 0 ? <TrendingUp size={18} /> : <ShieldCheck size={18} />}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-black text-slate-800 uppercase tracking-tight">{item.reason}</p>
+                                                        <p className="text-[10px] text-slate-400 uppercase font-black mt-1">
+                                                            {new Date(item.date).toLocaleDateString()} {item.complaintId && `• REF: #${item.complaintId}`}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className={`text-lg font-black ${item.credits > 0 ? 'text-green-600' : 'text-pmc-blue'}`}>
+                                                        {item.credits > 0 ? `+${item.credits}` : item.credits}
+                                                    </p>
+                                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">CIVIC PTS</p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-12">
+                                            <p className="text-xs font-black text-slate-300 uppercase tracking-widest">No verified history available in the ledger.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </main>

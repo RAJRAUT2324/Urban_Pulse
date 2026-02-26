@@ -9,7 +9,7 @@ const TripleHeader = ({ isFixed = true }) => {
     const navItems = [
         { name: 'The Corporation', path: '/corp-login' },
         { name: 'Urban Nervous System', path: '/corp-login' },
-        { name: 'Online Services', path: '#' },
+        { name: 'Transparency Portal', path: '/transparency-portal' },
         { name: 'City Pulse', path: '/city-pulse' },
         { name: 'Portal Login', path: '/login' },
         { name: 'Contact', path: '#' }

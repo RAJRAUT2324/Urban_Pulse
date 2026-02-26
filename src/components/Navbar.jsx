@@ -10,7 +10,7 @@ const Navbar = () => {
         { name: 'Departments', hasChild: true },
         { name: 'About Pune', hasChild: false },
         { name: 'News & Events', hasChild: false },
-        { name: 'Urban Seva', hasChild: false, path: '/urban-seva' },
+        { name: 'Transparency Portal', hasChild: false, path: '/transparency-portal' },
         { name: 'City Pulse', hasChild: false, path: '/city-pulse' },
         { name: 'Login', hasChild: false, path: '/login' },
         { name: 'Contact', hasChild: false },

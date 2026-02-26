@@ -6,7 +6,12 @@ import {
     CheckCircle2,
     Clock,
     BrainCircuit,
-    Map
+    Map,
+    AlertTriangle,
+    UserX,
+    Eye,
+    CheckCircle,
+    Search
 } from 'lucide-react';
 
 import CorpSidebar from '../components/corp/CorpSidebar';
@@ -15,6 +20,8 @@ import DepartmentGrid from '../components/corp/DepartmentGrid';
 import GrievanceTable from '../components/corp/GrievanceTable';
 import UrbanNervousSystem from '../components/UrbanNervousSystem';
 import ImpactDashboard from '../components/corp/ImpactDashboard';
+import DecisionForm from '../components/corp/DecisionForm';
+
 
 const CorporationPortal = () => {
     const [activeTab, setActiveTab] = useState('DASHBOARD');
@@ -28,13 +35,13 @@ const CorporationPortal = () => {
     const fetchData = async () => {
         try {
             const [gRes, sRes] = await Promise.all([
-                fetch('http://localhost:5000/api/grievances'),
-                fetch('http://localhost:5000/api/grievances/stats/departments')
+                fetch('/api/grievances'),
+                fetch('/api/grievances/stats/departments')
             ]);
             const gData = await gRes.json();
             const sData = await sRes.json();
-            setGrievances(gData);
-            setStats(sData);
+            setGrievances(Array.isArray(gData) ? gData : []);
+            setStats(Array.isArray(sData) ? sData : []);
             setLoading(false);
         } catch (error) {
             console.error("handshake_failed:", error);
@@ -49,7 +56,7 @@ const CorporationPortal = () => {
 
     const handleSolveGrievance = async (grievanceId) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/grievances/${grievanceId}/status`, {
+            const res = await fetch(`/api/grievances/${grievanceId}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: 'Resolved' })
@@ -228,19 +235,159 @@ const CorporationPortal = () => {
                         </motion.div>
                     )}
 
-                    {activeTab === 'IMPACT' && (
+                    {activeTab === 'DECISIONS' && (
                         <motion.div
-                            key="impact"
+                            key="decisions"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 20 }}
                         >
-                            <ImpactDashboard />
+                            <DecisionForm />
                         </motion.div>
                     )}
+
+                    {activeTab === 'EMERGENCY' && <EmergencyManager />}
                 </AnimatePresence>
             </div>
         </div>
+    );
+};
+
+// Isolated Emergency Manager Component for Officers
+const EmergencyManager = () => {
+    const [emergencies, setEmergencies] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selected, setSelected] = useState(null);
+    const [outcome, setOutcome] = useState('');
+
+    const fetchEmergencies = async () => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const res = await fetch('/api/emergency', {
+                headers: {
+                    'Authorization': userInfo ? `Bearer ${userInfo.token}` : ''
+                }
+            });
+            const data = await res.json();
+            setEmergencies(Array.isArray(data) ? data : []);
+            setLoading(false);
+        } catch (err) {
+            console.error(err);
+            setLoading(false);
+            setEmergencies([]);
+        }
+    };
+
+    useEffect(() => {
+        fetchEmergencies();
+    }, []);
+
+    const handleAction = async (id, status) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            await fetch(`/api/emergency/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': userInfo ? `Bearer ${userInfo.token}` : ''
+                },
+                body: JSON.stringify({ status, outcome })
+            });
+            setSelected(null);
+            setOutcome('');
+            fetchEmergencies();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-32">
+            <div className="flex items-center justify-between bg-red-50 border border-red-100 p-8 rounded-[2.5rem]">
+                <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-red-600/20">
+                        <ShieldAlert size={32} />
+                    </div>
+                    <div>
+                        <h2 className="text-3xl font-black text-red-600 tracking-tighter uppercase">Emergency Command Center</h2>
+                        <p className="text-[10px] text-red-400 font-black uppercase tracking-[0.2em]">Restricted High-Priority Protocols</p>
+                    </div>
+                </div>
+                <div className="px-6 py-3 bg-white border border-red-200 rounded-xl flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
+                    <span className="text-[11px] font-black text-red-600 uppercase tracking-widest">{emergencies.length} Active Alerts</span>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+                {Array.isArray(emergencies) && emergencies.map((emg) => (
+                    <div key={emg._id} className="bg-white border border-slate-200 rounded-4xl p-8 hover:shadow-xl transition-all group">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="flex items-center gap-4">
+                                <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${emg.type === 'Women Emergency' ? 'bg-red-600 text-white' : 'bg-slate-800 text-white'}`}>
+                                    {emg.type}
+                                </span>
+                                <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest font-mono">ID: {emg.referenceId}</span>
+                            </div>
+                            <span className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase ${emg.status === 'Reported' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
+                                {emg.status}
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                            <div className="space-y-6">
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Description</p>
+                                    <p className="text-sm font-bold text-slate-700 leading-relaxed">{emg.description}</p>
+                                </div>
+                                {emg.officerDetails && (
+                                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4">
+                                        <UserX size={18} className="text-red-400" />
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase">Target Details</p>
+                                            <p className="text-sm font-black text-slate-800">{emg.officerDetails}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-3 text-slate-400 text-[11px] font-black uppercase">
+                                    <Clock size={14} />
+                                    {new Date(emg.createdAt).toLocaleString()}
+                                </div>
+
+                                {selected === emg._id ? (
+                                    <div className="space-y-4 bg-slate-50 p-6 rounded-3xl border border-slate-200">
+                                        <textarea
+                                            value={outcome}
+                                            onChange={(e) => setOutcome(e.target.value)}
+                                            placeholder="Enter intervention details or investigation results..."
+                                            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-[12px] font-bold focus:outline-none focus:border-red-600/30"
+                                        />
+                                        <div className="flex gap-2">
+                                            <button onClick={() => handleAction(emg._id, 'Under Investigation')} className="flex-1 py-3 bg-pmc-blue text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-pmc-accent">Investigate</button>
+                                            <button onClick={() => handleAction(emg._id, 'Action Taken')} className="flex-1 py-3 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800">Resolve</button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <button onClick={() => setSelected(emg._id)} className="flex items-center gap-3 px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-pmc-blue hover:text-white transition-all">
+                                        <Eye size={16} />
+                                        Take Command
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+                {emergencies.length === 0 && (
+                    <div className="bg-white border-2 border-dashed border-slate-200 p-20 rounded-[3rem] text-center">
+                        <CheckCircle size={48} className="mx-auto text-slate-200 mb-4" />
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">No Active Emergency Alerts</p>
+                    </div>
+                )}
+            </div>
+        </motion.div>
     );
 };
 

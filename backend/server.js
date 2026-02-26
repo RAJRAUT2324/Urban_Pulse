@@ -8,6 +8,8 @@ import newsRoutes from './routes/newsRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import impactRoutes from './routes/impactRoutes.js';
+import supportRoutes from './routes/supportRoutes.js';
+import emergencyRoutes from './routes/emergencyRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 dotenv.config();
@@ -42,6 +44,8 @@ const startServer = async () => {
     app.use('/api/users', userRoutes);
     app.use('/api/ai', aiRoutes);
     app.use('/api/impact', impactRoutes);
+    app.use('/api/support', supportRoutes);
+    app.use('/api/emergency', emergencyRoutes);
 
     app.use(notFound);
     app.use(errorHandler);

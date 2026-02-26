@@ -9,7 +9,9 @@ import {
     Zap,
     ChevronRight,
     Shield,
-    Heart
+    Heart,
+    Gavel,
+    AlertCircle
 } from 'lucide-react';
 
 const CorpSidebar = ({ activeTab, setActiveTab, role }) => {
@@ -19,6 +21,8 @@ const CorpSidebar = ({ activeTab, setActiveTab, role }) => {
         { id: 'DEPARTMENTS', icon: <Users size={20} />, label: 'Departments', roles: ['Admin'] },
         { id: 'NERVOUS_SYSTEM', icon: <BrainCircuit size={20} />, label: 'Urban AI (CNS)', roles: ['Admin', 'Engineer'] },
         { id: 'IMPACT', icon: <Heart size={20} />, label: 'Citizen Impact', roles: ['Admin', 'Officer'] },
+        { id: 'DECISIONS', icon: <Gavel size={20} />, label: 'Admin Decisions', roles: ['Admin', 'Officer'] },
+        { id: 'EMERGENCY', icon: <AlertCircle size={20} />, label: 'Emergency Log', roles: ['Admin', 'Officer'] },
         { id: 'SETTINGS', icon: <Settings size={20} />, label: 'Control Center', roles: ['Admin'] },
     ];
 

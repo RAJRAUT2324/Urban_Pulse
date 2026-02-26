@@ -38,10 +38,14 @@ export const submitGrievance = async (req, res) => {
         // 1. AI Department Assignment
         const categoryMap = {
             'Pothole': 'Roads',
+            'Roads': 'Roads',
             'Drainage Leak': 'Water',
             'Water Supply': 'Water',
+            'Water': 'Water',
             'Streetlight': 'Electricity',
+            'Electricity': 'Electricity',
             'Garbage': 'Waste Management',
+            'Sanitation': 'Waste Management',
             'Health Hazard': 'Public Health'
         };
         const department = categoryMap[category] || 'Other';
