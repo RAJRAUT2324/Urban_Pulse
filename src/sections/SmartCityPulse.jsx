@@ -1,9 +1,23 @@
-import React, { Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { motion } from 'framer-motion';
-import HeroCity from '../components/HeroCity';
+import CityPulseHeatmap from '../components/CityPulseHeatmap';
 
 const SmartCityPulse = () => {
+    const [grievances, setGrievances] = useState([]);
+
+    useEffect(() => {
+        const fetchGrievances = async () => {
+            try {
+                const { data } = await axios.get('/api/grievances');
+                setGrievances(data);
+            } catch (error) {
+                console.error("Error fetching grievances for landing map:", error);
+            }
+        };
+        fetchGrievances();
+    }, []);
+
     return (
         <section className="py-32 bg-white overflow-hidden">
             <div className="gov-container">
@@ -18,20 +32,20 @@ const SmartCityPulse = () => {
                             Technology Showcase
                         </div>
                         <h2 className="text-5xl md:text-7xl font-black text-pmc-blue mb-8 leading-tight tracking-tighter">
-                            Digital Twin & <br />
+                            Asha Engine & <br />
                             <span className="text-gradient">Real-Time City Pulse</span>
                         </h2>
                         <p className="text-slate-500 text-lg mb-12 leading-relaxed font-medium">
-                            UrbanPulse uses advanced neural networks to map every grievance node across the city.
-                            Our "Digital Twin" technology allows municipal commissioners to visualize systemic issues
-                            before they escalate into city-wide crises.
+                            UrbanPulse uses the Asha Neural Engine to map every grievance node across the city in real-time.
+                            Our interactive intensity mapping allows for rapid response and predictive maintenance
+                            of municipal infrastructure.
                         </p>
 
                         <div className="space-y-8">
                             {[
-                                { title: "Neural Response Mapping", desc: "Visualize grievance categories in a real-time 3D dashboard." },
-                                { title: "Predictive Analytics", desc: "AI predicts potential waste & water management failures." },
-                                { title: "Resolution Traceability", desc: "Every point in the grid is a blockchain-verified status." }
+                                { title: "Neural Response Mapping", desc: "Visualize grievance categories in a real-time geo-spatial dashboard." },
+                                { title: "Predictive Analytics", desc: "AI predicts potential waste & water management failures before they happen." },
+                                { title: "Resolution Traceability", desc: "Every node in the pulse is a blockchain-verified grievance ticket." }
                             ].map((item, i) => (
                                 <motion.div
                                     key={i}
@@ -55,24 +69,16 @@ const SmartCityPulse = () => {
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="lg:w-1/2 w-full h-[500px] md:h-[650px] bg-slate-900 rounded-[3rem] overflow-hidden relative shadow-2xl border-x border-t border-white/10"
+                        className="lg:w-1/2 w-full h-[500px] md:h-[650px] rounded-[3rem] overflow-hidden relative shadow-2xl border border-slate-200 bg-slate-50"
                     >
-                        <Canvas camera={{ position: [0, 10, 20], fov: 45 }}>
-                            <Suspense fallback={null}>
-                                <HeroCity />
-                            </Suspense>
-                        </Canvas>
-                        {/* Overlay Controls */}
-                        <div className="absolute top-6 right-6 flex flex-col gap-2">
-                            <button className="bg-white/10 backdrop-blur-md p-2 rounded-lg text-white border border-white/20 hover:bg-white/20">
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Live Pulse</span>
-                            </button>
-                            <button className="bg-pmc-blue p-2 rounded-lg text-white shadow-lg">
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Toggle GIS</span>
-                            </button>
-                        </div>
-                        <div className="absolute bottom-6 left-6 text-white/50 text-[10px] uppercase font-bold tracking-[0.3em]">
-                            Pune Urban Digital Twin v2.0
+                        <CityPulseHeatmap data={grievances} height="100%" />
+
+                        {/* Overlay Metadata */}
+                        <div className="absolute top-6 right-6 z-10 flex flex-col gap-2">
+                            <div className="bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-white border border-white/10 flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-pmc-accent animate-pulse" />
+                                <span className="text-[9px] font-extrabold uppercase tracking-widest">Live Pulse Feed</span>
+                            </div>
                         </div>
                     </motion.div>
                 </div>

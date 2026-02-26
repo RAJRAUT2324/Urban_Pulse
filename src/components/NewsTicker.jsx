@@ -2,10 +2,12 @@ import React from 'react';
 
 const NewsTicker = () => {
     const alerts = [
-        "IMPORTANT: GIS-based Property Tax mapping for year 2026-27 is now LIVE. Please verify your data.",
-        "URGENT: Water supply update for Kothrud and Bavdhan areas for coming Thursday.",
-        "New: Online building plan approval process (BPMS) simplified. Check service portal.",
-        "Citizen Notice: Mayor's grievance resolution meet on Saturday at UrbanPulse Head Office."
+        "Citizen: Verified the water leak at Sham Chowk and got my free UrbanPulse Shirt! Best app ever.",
+        "Impact Leader: Collected 5 badges and just downloaded my Golden Prime Medal. Feeling like a city hero!",
+        "Quick Reward: Scanned my QR code at the local shop and got my free glasses in 2 minutes. Thank you PMC!",
+        "Community: My report on Gadge Nagar street lights was resolved and I got my first reward coupon instantly.",
+        "Verified: Just claimed my 100% discount T-Shirt reward for improving our city infrastructure!",
+        "Milestone: Reached 10 reports! The Golden Prime badge looks amazing on my profile."
     ];
 
     return (

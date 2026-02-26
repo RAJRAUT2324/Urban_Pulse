@@ -7,7 +7,9 @@ import {
     verifyFix,
     getNearbyValidators,
     getDepartmentStats,
-    reviewResolution
+    reviewResolution,
+    assignTask,
+    submitResolution
 } from '../controllers/grievanceController.js';
 
 const router = express.Router();
@@ -33,6 +35,12 @@ router.route('/:id/nearby-validators')
 
 router.route('/:id/review')
     .put(reviewResolution);
+
+router.route('/:id/assign')
+    .put(assignTask);
+
+router.route('/:id/resolve')
+    .put(submitResolution);
 
 export default router;
 

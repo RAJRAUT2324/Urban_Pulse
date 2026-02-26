@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Globe, Accessibility, Phone, Mail, Facebook, Twitter, Instagram, Youtube, Menu, X, ChevronDown } from 'lucide-react';
+import { Search, Globe, Accessibility, Phone, Mail, Facebook, Twitter, Instagram, Youtube, Menu, X, ChevronDown, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TripleHeader = ({ isFixed = true }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [userInfo, setUserInfo] = useState(null);
     const navItems = [
         { name: 'The Corporation', path: '/corp-login' },
         { name: 'Urban Nervous System', path: '/corp-login' },
         { name: 'Transparency Portal', path: '/transparency-portal' },
         { name: 'City Pulse', path: '/city-pulse' },
-        { name: 'Portal Login', path: '/login' },
-        { name: 'Contact', path: '#' }
+        { name: 'Worker Portal', path: '/worker-portal' }
     ];
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('userInfo');
+        if (storedUser) {
+            setUserInfo(JSON.parse(storedUser));
+        }
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('userInfo');
+        setUserInfo(null);
+        window.location.href = '/';
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -54,11 +67,35 @@ const TripleHeader = ({ isFixed = true }) => {
                                 <Link
                                     key={item.name}
                                     to={item.path}
-                                    className={`px-5 py-2.5 rounded-xl text-[13px] font-bold tracking-tight transition-all duration-300 hover:bg-pmc-blue/5 ${item.name === 'Portal Login' ? 'btn-primary ml-4' : 'text-slate-600 hover:text-pmc-blue'}`}
+                                    className={`px-5 py-2.5 rounded-xl text-[13px] font-bold tracking-tight transition-all duration-300 hover:bg-pmc-blue/5 text-slate-600 hover:text-pmc-blue`}
                                 >
                                     {item.name}
                                 </Link>
                             ))}
+
+                            {userInfo ? (
+                                <div className="flex items-center gap-4 ml-4 pl-4 border-l border-slate-200">
+                                    <Link to="/profile" className="flex items-center gap-2 group">
+                                        <div className="w-8 h-8 rounded-full bg-pmc-blue/10 flex items-center justify-center text-pmc-blue group-hover:bg-pmc-blue group-hover:text-white transition-all">
+                                            <User size={14} />
+                                        </div>
+                                        <span className="text-xs font-black text-slate-800 uppercase tracking-tighter">{userInfo.name.split(' ')[0]}</span>
+                                    </Link>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:text-red-600 transition-colors"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            ) : (
+                                <Link
+                                    to="/login"
+                                    className="btn-primary ml-4 px-5 py-2.5 rounded-xl text-[13px] font-bold tracking-tight transition-all duration-300"
+                                >
+                                    Portal Login
+                                </Link>
+                            )}
                         </div>
 
                         {/* Mobile & Utility Actions */}

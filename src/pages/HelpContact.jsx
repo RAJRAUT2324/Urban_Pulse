@@ -23,7 +23,7 @@ const HelpContact = () => {
     useEffect(() => {
         const fetchGrievances = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/api/support/user-grievances/${userId}`);
+                const res = await fetch(`/api/support/user-grievances/${userId}`);
                 const data = await res.json();
                 setGrievances(data);
             } catch (err) {

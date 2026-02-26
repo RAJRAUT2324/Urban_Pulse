@@ -20,6 +20,8 @@ import Recruitment from './pages/seva/Recruitment';
 import Gardens from './pages/seva/Gardens';
 import HelpContact from './pages/HelpContact';
 import EmergencyPortal from './pages/EmergencyPortal';
+import WorkerPortal from './pages/WorkerPortal';
+import RewardRedemption from './pages/RewardRedemption';
 
 import Navbar from './components/Navbar';
 import FloatingAnnouncement from './components/FloatingAnnouncement';
@@ -48,6 +50,8 @@ function App() {
           <Route path="/urban-seva/gardens" element={<Gardens />} />
           <Route path="/help-contact" element={<HelpContact />} />
           <Route path="/emergency-portal" element={<EmergencyPortal />} />
+          <Route path="/worker-portal" element={<WorkerPortal />} />
+          <Route path="/reward-redemption/:id" element={<RewardRedemption />} />
         </Routes>
         <FloatingAnnouncement />
       </div>

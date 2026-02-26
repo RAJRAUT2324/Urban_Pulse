@@ -23,7 +23,7 @@ const LoginPage = () => {
                 },
             };
 
-            const url = isRegister ? 'http://localhost:5000/api/users' : 'http://localhost:5000/api/users/login';
+            const url = isRegister ? '/api/users' : '/api/users/login';
             const payload = isRegister ? { name, email, password, role } : { email, password, role };
 
             const { data } = await axios.post(url, payload, config);

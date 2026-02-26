@@ -11,7 +11,7 @@ const FloatingAnnouncement = () => {
     useEffect(() => {
         const fetchLatestDecision = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/news');
+                const res = await fetch('/api/news');
                 const data = await res.json();
                 // Get the most recent "important" decision
                 const importantOnes = data.filter(item => item.important === true);

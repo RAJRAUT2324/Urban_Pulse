@@ -1,89 +1,315 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, ShieldAlert, Zap, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap, Marker } from 'react-leaflet';
+import { io } from 'socket.io-client';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldAlert, Zap, Thermometer, Radio, Navigation, Crosshair, Maximize2, Minimize2 } from 'lucide-react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-const CityPulseHeatmap = ({ data = [], height = "400px" }) => {
-    // Normalized points for an abstract grid
-    // In a real map, we'd use Leaflet or Google Maps. 
-    // Here we create a stylized "Neural City Grid" visualization.
+// Master Coordinate Baseline - Amravati, Maharashtra
+const AMRAVATI_CENTER = [20.9320, 77.7523];
+
+// Fix for default marker icons in Leaflet
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+let DefaultIcon = L.icon({
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Auto-Center Bounds Component
+const FitBounds = ({ nodes }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (nodes && nodes.length > 0) {
+            const bounds = L.latLngBounds(nodes
+                .filter(n => n.latitude && n.longitude)
+                .map(n => [Number(n.latitude), Number(n.longitude)])
+            );
+            if (bounds.isValid()) {
+                map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+            }
+        }
+    }, [nodes, map]);
+    return null;
+};
+
+// Refresh Center Component for smooth-panning
+const RefreshCenter = ({ center, zoom = 14 }) => {
+    const map = useMap();
+    useEffect(() => {
+        if (center) {
+            map.flyTo(center, zoom, { duration: 1.5 });
+        }
+    }, [center, zoom, map]);
+    return null;
+};
+
+// GPS Locator Logic Component
+const MapController = ({ setUserLocation, setLatestNode }) => {
+    const map = useMap();
+
+    // Function to handle location finding
+    const handleLocate = () => {
+        map.locate({ setView: true, maxZoom: 16 });
+    };
+
+    useEffect(() => {
+        // Only set initial view if no grievances exist yet
+        // If they exist, FitBounds will handle the framing
+
+        map.on('locationfound', (e) => {
+            setUserLocation([e.latitude, e.longitude]);
+            setLatestNode([e.latitude, e.longitude]);
+        });
+
+        map.on('locationerror', (e) => {
+            console.error("GPS Location Error:", e.message);
+            alert("Could not access your location. Please check browser permissions.");
+        });
+    }, [map, setUserLocation, setLatestNode]);
 
     return (
-        <div className="relative bg-slate-950 rounded-[2.5rem] border border-white/10 overflow-hidden group shadow-2xl" style={{ height }}>
-            {/* Grid Overlay */}
-            <div className="absolute inset-0 opacity-20 pointer-events-none"
-                style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(59,130,246,0.3) 1px, transparent 0)', backgroundSize: '30px 30px' }} />
+        <div className="absolute top-24 left-6 z-999">
+            <button
+                onClick={handleLocate}
+                className="bg-slate-900/80 backdrop-blur-md p-3 rounded-2xl border border-white/10 text-pmc-accent hover:bg-pmc-accent hover:text-white transition-all shadow-xl group"
+                title="Locate My Position"
+            >
+                <Crosshair size={20} className="group-active:scale-90 transition-transform" />
+            </button>
+        </div>
+    );
+};
 
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-[80%] h-[80%] border-2 border-white/5 rounded-full border-dashed animate-[spin_60s_linear_infinity]" />
-                <div className="absolute w-[60%] h-[60%] border border-white/5 rounded-full border-dashed animate-[spin_40s_linear_reverse_infinity]" />
+const CityPulseHeatmap = ({ data: initialData = [], height = "600px" }) => {
+    const [grievances, setGrievances] = useState(initialData);
+    const [latestNode, setLatestNode] = useState(null);
+    const [userLocation, setUserLocation] = useState(null);
+    const [connected, setConnected] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const socketRef = useRef();
+
+    // Invalidate map size on fullscreen toggle
+    const FullscreenController = () => {
+        const map = useMap();
+        useEffect(() => {
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 300);
+        }, [isFullscreen, map]);
+        return null;
+    };
+
+    useEffect(() => {
+        // Initialize Socket.io
+        socketRef.current = io('http://localhost:5000');
+
+        socketRef.current.on('connect', () => {
+            console.log('🔗 Connected to CityPulse Heatmap Relay');
+            setConnected(true);
+        });
+
+        socketRef.current.on('newGrievance', (newGrievance) => {
+            console.log('🎯 New Crisis Node Detected:', newGrievance);
+            setGrievances(prev => [newGrievance, ...prev]);
+
+            // Universal Auto-Pan: Fly to the new hotspot regardless of location
+            if (newGrievance.latitude && newGrievance.longitude) {
+                setLatestNode([Number(newGrievance.latitude), Number(newGrievance.longitude)]);
+            }
+        });
+
+        return () => {
+            socketRef.current.disconnect();
+        };
+    }, []);
+
+    // Sync initial data if it changes & Log for debugging
+    useEffect(() => {
+        if (initialData && initialData.length > 0) {
+            console.log("📍 Heatmap Data Received:", initialData);
+            setGrievances(initialData);
+        }
+    }, [initialData]);
+
+    const getHeatStyle = (status) => {
+        // User Requested Status Mapping:
+        // 'Pending' -> 'red'
+        // 'In-Progress' -> 'yellow'
+        // 'Resolved' -> 'green'
+
+        const s = status || 'Reported';
+
+        // 🟢 Resolved: Resolved, Archived, Blockchain Verified
+        if (['Resolved', 'Archived', 'Blockchain Verified'].includes(s)) {
+            return { color: '#22c55e', size: 8, label: 'Resolved', pulse: false };
+        }
+
+        // 🟡 In-Progress: Worker Assigned, Work Under Review, In-Progress
+        if (['Worker Assigned', 'Work Under Review', 'In-Progress'].includes(s)) {
+            return { color: '#eab308', size: 10, label: 'In-Progress', pulse: false };
+        }
+
+        // 🔴 Pending: Reported, AI Classified, Pending Verification, Pending
+        return { color: '#ef4444', size: 16, label: 'Pending', pulse: true };
+    };
+
+    return (
+        <div
+            className={`relative border border-slate-200 overflow-hidden shadow-2xl bg-white isolate transition-all duration-500 ease-in-out ${isFullscreen
+                ? 'fixed inset-0 z-9999 rounded-0'
+                : 'rounded-[2.5rem]'
+                }`}
+            style={{ height: isFullscreen ? '100vh' : height, width: isFullscreen ? '100vw' : '100%' }}
+        >
+            {/* Fullscreen Toggle Button */}
+            <div className="absolute top-6 right-6 z-10000">
+                <button
+                    onClick={() => setIsFullscreen(!isFullscreen)}
+                    className="bg-white/90 backdrop-blur-md p-3 rounded-2xl border border-slate-200 text-pmc-blue hover:bg-pmc-blue hover:text-white transition-all shadow-xl flex items-center gap-2 group"
+                >
+                    {isFullscreen ? (
+                        <>
+                            <Minimize2 size={18} className="group-active:scale-95 transition-transform" />
+                            <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">Minimize</span>
+                        </>
+                    ) : (
+                        <>
+                            <Maximize2 size={18} className="group-active:scale-95 transition-transform" />
+                            <span className="text-[10px] font-black uppercase tracking-widest hidden md:inline">Maximize</span>
+                        </>
+                    )}
+                </button>
             </div>
 
-            {/* Heat Points */}
-            <div className="absolute inset-0 p-12">
-                <div className="relative w-full h-full">
-                    {data.map((point, i) => {
-                        // Mock mapping from lat/lng to component coords (since we have an abstract map)
-                        const left = ((point.lng % 1) * 1000) % 100;
-                        const top = ((point.lat % 1) * 1000) % 100;
+            {/* Connection Status Indicator */}
+            <div className="absolute top-6 left-6 z-999 flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full border border-slate-200 shadow-sm">
+                <div className={`w-2 h-2 rounded-full animate-pulse ${connected ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-red-500'}`} />
+                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest leading-none">
+                    {connected ? 'Neural Bridge Active' : 'Connecting...'}
+                </span>
+            </div>
 
-                        const colorMap = {
-                            red: 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.8)]',
-                            orange: 'bg-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.8)]',
-                            yellow: 'bg-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.8)]',
-                            green: 'bg-green-500 shadow-[0_0_20px_rgba(34,197,94,0.8)]'
-                        };
+            <MapContainer
+                center={AMRAVATI_CENTER}
+                zoom={13}
+                style={{ height: '100%', width: '100%', zIndex: 1 }}
+                scrollWheelZoom={false}
+                zoomControl={false}
+            >
+                <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
 
-                        const color = point.intensity || 'green';
+                <FitBounds nodes={grievances} />
+                <RefreshCenter center={latestNode} />
 
-                        return (
-                            <motion.div
-                                key={i}
-                                initial={{ scale: 0, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ delay: i * 0.05, type: 'spring' }}
-                                className="absolute cursor-help group/point"
-                                style={{ left: `${left}%`, top: `${top}%` }}
-                            >
-                                <div className={`w-3 h-3 rounded-full ${colorMap[color]} animate-pulse`} />
+                <FullscreenController />
+                <MapController setUserLocation={setUserLocation} setLatestNode={setLatestNode} />
 
-                                {/* Tooltip */}
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-3 py-2 bg-slate-900 border border-white/10 rounded-xl text-[10px] font-black text-white whitespace-nowrap opacity-0 group-hover/point:opacity-100 transition-all scale-75 group-hover/point:scale-100 pointer-events-none z-50 shadow-2xl">
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${colorMap[color]}`} />
-                                        <span>STRESS INDEX: {point.weight}</span>
+                {userLocation && (
+                    <Marker position={userLocation}>
+                        <Popup>
+                            <div className="text-[10px] font-black uppercase text-pmc-blue">Your Location</div>
+                        </Popup>
+                    </Marker>
+                )}
+
+                {grievances.map((node) => {
+                    const lat = Number(node.latitude);
+                    const lng = Number(node.longitude);
+
+                    if (!lat || !lng) return null;
+                    const style = getHeatStyle(node.status);
+
+                    return (
+                        <CircleMarker
+                            key={node._id || node.grievanceId}
+                            center={[lat, lng]}
+                            radius={style.size}
+                            pathOptions={{
+                                fillColor: style.color,
+                                fillOpacity: 0.8,
+                                color: 'white',
+                                weight: 2,
+                                className: style.pulse ? 'animate-pulse' : ''
+                            }}
+                        >
+                            <Popup className="glass-popup">
+                                <div className="p-4 bg-white/95 text-slate-800 rounded-2xl border border-slate-200 shadow-2xl backdrop-blur-xl min-w-[200px]">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-slate-100`} style={{ color: style.color }}>
+                                            {style.label}
+                                        </span>
+                                        <span className="text-[8px] text-slate-400 font-black">#{node.grievanceId}</span>
                                     </div>
-                                    <p className="text-slate-400 mt-1 uppercase tracking-widest">{point.status}</p>
+                                    <h4 className="font-black text-sm mb-1 text-pmc-blue">{node.category}</h4>
+                                    <p className="text-[10px] text-slate-500 mb-3 leading-relaxed font-medium">{node.description}</p>
+                                    <div className="pt-3 border-t border-slate-100 flex justify-between items-center">
+                                        <div className="flex items-center gap-1 text-[8px] font-black text-pmc-accent uppercase tracking-widest">
+                                            <Zap size={10} /> AI Analysis Verified
+                                        </div>
+                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{node.status}</div>
+                                    </div>
                                 </div>
-                            </motion.div>
-                        );
-                    })}
-                </div>
+                            </Popup>
+                        </CircleMarker>
+                    );
+                })}
+            </MapContainer>
+
+            {/* Map Legend */}
+            <div className="absolute bottom-8 right-8 z-999 space-y-3 bg-white/90 backdrop-blur-md p-6 rounded-3xl border border-slate-200 shadow-xl max-sm:scale-75 max-sm:origin-bottom-right">
+                <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+                    <Radio size={12} className="text-pmc-blue" /> Pulse Intensity
+                </h5>
+                {[
+                    { color: '#ef4444', label: 'Pending', desc: 'Awaiting Action' },
+                    { color: '#eab308', label: 'In-Progress', desc: 'Work in Movement' },
+                    { color: '#22c55e', label: 'Resolved', desc: 'Verified Resolution' }
+                ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-4">
+                        <div className={`w-2.5 h-2.5 rounded-full border border-white shadow-sm ${item.label === 'Pending' ? 'animate-pulse' : ''}`} style={{ backgroundColor: item.color }} />
+                        <div>
+                            <p className="text-[9px] font-black text-slate-700 tracking-widest uppercase">{item.label}</p>
+                            <p className="text-[8px] font-bold text-slate-400">{item.desc}</p>
+                        </div>
+                    </div>
+                ))}
             </div>
 
-            {/* Legend */}
-            <div className="absolute top-8 left-8 flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
-                    <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">CRISIS</span>
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]" />
-                    <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">STRESS</span>
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-                    <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">RESILIENT</span>
-                </div>
-            </div>
-
-            {/* Header info */}
-            <div className="absolute top-8 right-8 text-right">
-                <h4 className="text-white font-black text-xl tracking-tighter uppercase mb-1">City Pulse Intelligence</h4>
-                <p className="text-pmc-accent text-[10px] font-black uppercase tracking-[0.2em]">Real-time Geo-Neural Flux</p>
-            </div>
-
-            {/* Bottom Scanline */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-linear-to-r from-transparent via-pmc-accent/50 to-transparent animate-[pulse_2s_infinite]" />
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .leaflet-popup-content-wrapper {
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    padding: 0 !important;
+                }
+                .leaflet-popup-tip {
+                    background: white !important;
+                    border: 1px solid rgba(0,0,0,0.05);
+                }
+                .leaflet-container {
+                    background: #f8fafc !important;
+                }
+                .glass-popup .leaflet-popup-content {
+                    margin: 0 !important;
+                    width: auto !important;
+                }
+                @keyframes pulse-custom {
+                    0% { transform: scale(1); opacity: 0.8; }
+                    50% { transform: scale(1.2); opacity: 0.4; }
+                    100% { transform: scale(1); opacity: 0.8; }
+                }
+                .animate-pulse {
+                    animation: pulse-custom 2s infinite ease-in-out;
+                }
+            `}} />
         </div>
     );
 };

@@ -269,6 +269,10 @@ export const getDecisionOfTheWeek = async (req, res) => {
             return { grievance: g, score };
         }).sort((a, b) => b.score - a.score);
 
+        if (ranked.length === 0) {
+            return res.status(404).json({ message: 'No suitable resolutions found for this week (after ranking)' });
+        }
+
         const selected = ranked[0].grievance;
         const logs = await AuditLog.find({ ticketId: selected._id }).sort({ timestamp: 1 });
 

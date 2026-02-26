@@ -20,7 +20,7 @@ const LandingPage = () => {
             <div id="top" className="absolute top-0"></div>
 
             {/* Official PMC-style Header System */}
-            <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+            <header className="fixed top-0 left-0 w-full z-2000 bg-white/80 backdrop-blur-md border-b border-slate-100">
                 {/* <NewsTicker /> */}
                 <TripleHeader isFixed={false} />
             </header>
@@ -90,6 +90,11 @@ const LandingPage = () => {
 
                 {/* Formal Reference Footer (As per screenshot 2) */}
                 <Footer />
+            </div>
+
+            {/* Floating Reward Reviews Strip (Moving Ticker) */}
+            <div className="fixed bottom-0 left-0 w-full z-1000 bg-pmc-blue shadow-[0_-10px_30px_rgba(15,23,42,0.3)]">
+                <NewsTicker />
             </div>
 
             {/* Floating PMC Digital Assistant */}

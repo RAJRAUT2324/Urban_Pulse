@@ -24,7 +24,7 @@ const ImpactDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/impact/heatmap');
+                const res = await fetch('/api/impact/heatmap');
                 const data = await res.json();
                 setHeatmapData(data);
 

@@ -3,7 +3,70 @@ import AuditLog from '../models/AuditLog.js';
 import User from '../models/User.js';
 import Asset from '../models/Asset.js';
 import CivicCredits from '../models/CivicCredits.js';
+import sendEmail from '../utils/sendEmail.js';
+import { sendRewardEmail } from '../utils/rewardEmail.js';
 import { createBlockData } from '../utils/ledgerUtils.js';
+import { verifyWork } from '../utils/AutomatedSuperior.js';
+
+// --- HELPER: Citizen Rewards & Badges ---
+export const handleCitizenRewards = async (user, grievanceId) => {
+    user.badgeCount = (user.badgeCount || 0) + 1;
+    await user.save();
+
+    // --- NEW: Badge Reward Email Notification ---
+    await sendRewardEmail(user.name, user.email, `Elite Citizen Badge #${user.badgeCount}`);
+
+    console.log(`\n--- 📧 SENDING REAL EMAIL TO: ${user.email} ---`);
+
+    // Construct HTML Email
+    let emailHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 15px;">
+            <h2 style="color: #2563eb;">Urban Pulse - Impact Verification</h2>
+            <p>Dear ${user.name || 'Citizen'},</p>
+            <p>Regarding your report: <strong>${grievanceId}</strong></p>
+            <p style="font-size: 18px; color: #059669; font-weight: bold; border-left: 4px solid #059669; padding-left: 10px;">
+                "You are the best person for self motivation and every time!"
+            </p>
+    `;
+
+    if (user.badgeCount === 3) {
+        emailHtml += `
+            <div style="background: #fefce8; padding: 20px; border-radius: 12px; border: 1px solid #fef08a; margin-top: 20px;">
+                <h3 style="color: #854d0e; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                    🏆 Milestone Reached: BEST PERSON AWARD
+                </h3>
+                <p>Congratulations! You have earned 3 badges for your civic contributions.</p>
+                <p><strong>Digital Certificate:</strong> Awarded for Citizen Excellence 2026</p>
+                <p><strong>Coupon Code:</strong> <span style="background: #fff; padding: 5px 10px; border: 1px dashed #854d0e; font-family: monospace; font-weight: bold;">URBAN-HERO-FREE</span></p>
+                <hr style="border: 0; border-top: 1px solid #fde68a; margin: 15px 0;">
+                <p style="margin-bottom: 0;"><strong>Physical Rewards:</strong> Your free <strong>Urban Pulse Shirt & Goggles</strong> are now claimable from your rewards portal!</p>
+            </div>
+        `;
+    } else {
+        emailHtml += `
+            <p style="background: #f1f5f9; padding: 10px; border-radius: 8px; color: #475569;">
+                Current Badge Count: <strong>${user.badgeCount}/3</strong> for your next milestone award.
+            </p>
+        `;
+    }
+
+    emailHtml += `
+            <p style="color: #64748b; font-size: 12px; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px;">
+                Urban Pulse: Building better cities together.
+            </p>
+        </div>
+    `;
+
+    /* 
+    // Commented out to use the simpler frontend Gmail redirect approach as requested
+    await sendEmail({
+        email: user.email,
+        subject: `Urban Pulse Impact: ${grievanceId} Verified`,
+        message: `You are the best person for self motivation and every time! Your badge count is ${user.badgeCount}.`,
+        html: emailHtml
+    });
+    */
+};
 
 // --- HELPER: AI Priority Calculation ---
 const calculateInternalPriority = (category, description, locationContext = {}) => {
@@ -93,7 +156,7 @@ export const submitGrievance = async (req, res) => {
             latitude, longitude, exifTimestamp, description,
             grievanceId, proofUrl, originalReporter: userId,
             lastHash: blockData.currentHash,
-            department, priorityScore, aiAnalysis,
+            department, priorityScore: priorityScore || 100, aiAnalysis,
             status: 'AI Classified',
             assetId
         });
@@ -102,6 +165,11 @@ export const submitGrievance = async (req, res) => {
         blockData.ticketId = grievance._id;
 
         await AuditLog.create(blockData);
+
+        // Emit real-time update
+        if (req.io) {
+            req.io.emit('newGrievance', grievance);
+        }
 
         res.status(201).json(grievance);
     } catch (error) {
@@ -139,6 +207,18 @@ export const updateGrievanceStatus = async (req, res) => {
         if (status === 'Resolved') {
             console.log(`\n--- WHATSAPP: Dear ${grievance.citizenName}, report ${grievance.grievanceId} is RESOLVED. ---`);
             console.log(`Please verify the fix at: http://localhost:5173/city-pulse`);
+
+            // Award points to the worker
+            if (grievance.assignedWorker) {
+                const worker = await User.findById(grievance.assignedWorker);
+                if (worker) {
+                    worker.workerPoints = (worker.workerPoints || 0) + 100;
+                    worker.tasksVerified = (worker.tasksVerified || 0) + 1;
+                    worker.qualityScore = Math.min(100, (worker.qualityScore || 0) + 5);
+                    await worker.save();
+                    console.log(`[GAMIFICATION] Awarded 100 points to worker: ${worker.name}`);
+                }
+            }
 
             // FEEDBACK LOOP (Industrial Learning System)
             // If resolving a high-priority issue quickly, we reinforce the priority engine's weights.
@@ -201,6 +281,9 @@ export const verifyFix = async (req, res) => {
                 });
 
                 await civicCredits.save();
+
+                // --- NEW: Badge & Reward Logic ---
+                await handleCitizenRewards(user, grievance.grievanceId);
             }
         }
         // -------------------------------
@@ -331,6 +414,9 @@ export const reviewResolution = async (req, res) => {
                     });
 
                     await civicCredits.save();
+
+                    // --- NEW: Badge & Reward Logic ---
+                    await handleCitizenRewards(user, grievance.grievanceId);
                 }
             }
             // ----------------------------------------------
@@ -346,3 +432,87 @@ export const reviewResolution = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 }
+
+// @desc    Assign worker to grievance
+// @route   PUT /api/grievances/:id/assign
+// @access  Private/Worker
+export const assignTask = async (req, res) => {
+    try {
+        const { workerId } = req.body;
+        const grievance = await Grievance.findOne({ grievanceId: req.params.id });
+
+        if (!grievance) return res.status(404).json({ message: "Grievance not found" });
+
+        grievance.status = 'Worker Assigned';
+        grievance.assignedWorker = workerId;
+        grievance.assignedAt = new Date();
+
+        const blockData = createBlockData(grievance._id, `Worker Assigned: ${workerId}`, grievance.lastHash);
+        grievance.lastHash = blockData.currentHash;
+
+        await grievance.save();
+        await AuditLog.create(blockData);
+
+        res.json({ message: "Task assigned successfully", grievance });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+// @desc    Submit resolution proof
+// @route   PUT /api/grievances/:id/resolve
+// @access  Private/Worker
+export const submitResolution = async (req, res) => {
+    try {
+        const { resolutionProofUrl, latitude, longitude } = req.body;
+        const grievance = await Grievance.findOne({ grievanceId: req.params.id });
+
+        if (!grievance) return res.status(404).json({ message: "Grievance not found" });
+
+        // --- NEW: AI Automated Verification (CV + Geofencing) ---
+        const verification = await verifyWork(
+            resolutionProofUrl,
+            latitude,
+            longitude,
+            grievance.latitude || latitude, // Fallback to provided if task has no lat
+            grievance.longitude || longitude
+        );
+
+        if (!verification.success) {
+            return res.status(400).json({
+                message: verification.message,
+                verificationDetails: verification
+            });
+        }
+        // -------------------------------------------------------
+
+        grievance.status = 'Resolved'; // Promoted from 'Work Under Review' if AI pass
+        grievance.resolutionProofUrl = resolutionProofUrl;
+        grievance.completedAt = new Date();
+
+        const blockData = createBlockData(grievance._id, `Resolution Verified by AI Superior (Conf: ${verification.confidence}%)`, grievance.lastHash);
+        grievance.lastHash = blockData.currentHash;
+
+        await grievance.save();
+        await AuditLog.create(blockData);
+
+        // Award points immediately on AI pass
+        if (grievance.assignedWorker) {
+            const worker = await User.findById(grievance.assignedWorker);
+            if (worker) {
+                worker.workerPoints = (worker.workerPoints || 0) + 100;
+                worker.tasksVerified = (worker.tasksVerified || 0) + 1;
+                worker.qualityScore = Math.min(100, (worker.qualityScore || 0) + 5);
+                await worker.save();
+            }
+        }
+
+        res.json({
+            message: "Resolution verified by AI! Points awarded.",
+            confidence: verification.confidence,
+            grievance
+        });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};

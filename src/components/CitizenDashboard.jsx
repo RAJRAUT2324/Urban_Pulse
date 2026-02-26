@@ -30,6 +30,7 @@ const CitizenDashboard = () => {
     const [credits, setCredits] = useState(null);
     const [loading, setLoading] = useState(true);
     const [feedbackModal, setFeedbackModal] = useState(null);
+    const [rewardModal, setRewardModal] = useState(null); // { id: string, name: string }
     const [feedbackValue, setFeedbackValue] = useState('');
     const [feedbackComment, setFeedbackComment] = useState('');
     const navigate = useNavigate();
@@ -73,10 +74,21 @@ const CitizenDashboard = () => {
         }
 
         try {
+            const isResolved = feedbackValue === 'Resolved';
             await axios.put(`/api/grievances/${feedbackModal}/review`, {
-                satisfaction: feedbackValue === 'Resolved',
+                satisfaction: isResolved,
                 comment: feedbackComment
             });
+
+            // --- NEW: Instant QR Reward Modal ---
+            if (isResolved) {
+                setRewardModal({
+                    id: feedbackModal,
+                    name: user?.name || 'Citizen'
+                });
+            }
+            // -------------------------------------
+
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             fetchData(userInfo.token);
             setFeedbackModal(null);
@@ -102,6 +114,7 @@ const CitizenDashboard = () => {
         { label: "Active Tickets", value: pending.length, icon: <Clock size={20} />, color: "pmc-orange" },
         { label: "Success Rate", value: grievances.length ? Math.round((resolvedCount / grievances.length) * 100) + "%" : "0%", icon: <CheckCircle size={20} />, color: "pmc-accent" },
         { label: "Impact Credits", value: credits?.totalCredits || 0, icon: <Award size={20} />, color: "pmc-saffron" },
+        { label: "Reports Submitted", value: grievances.length, icon: <Plus size={20} />, color: "pmc-accent" },
     ];
 
     return (
@@ -368,6 +381,81 @@ const CitizenDashboard = () => {
                                 >
                                     Submit Final Audit
                                 </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Reward QR Code Modal */}
+            <AnimatePresence>
+                {rewardModal && (
+                    <div className="fixed inset-0 z-110 flex items-center justify-center p-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setRewardModal(null)}
+                            className="absolute inset-0 bg-pmc-blue/90 backdrop-blur-xl"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 30 }}
+                            className="relative bg-white w-full max-w-md rounded-[3rem] p-10 shadow-2xl overflow-hidden border border-white/20"
+                        >
+                            <div className="text-center">
+                                <div className="w-20 h-20 bg-pmc-accent/10 text-pmc-accent rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Award size={40} />
+                                </div>
+                                <h3 className="text-2xl font-black text-pmc-blue tracking-tighter mb-2">Instant Reward Earned!</h3>
+                                <p className="text-slate-500 font-medium text-sm mb-8 italic">"You are the best person for self motivation and every time!"</p>
+
+                                <div className="flex flex-col md:flex-row gap-6 items-center mb-8">
+                                    <div className="bg-slate-50 p-6 rounded-4xl border-2 border-slate-100 flex-1 relative group">
+                                        <img
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.origin + '/reward-redemption/' + rewardModal.id)}`}
+                                            alt="Reward QR Code"
+                                            className="w-40 h-40 mx-auto rounded-2xl shadow-lg border-4 border-white"
+                                        />
+                                        <div className="mt-4">
+                                            <p className="text-[10px] font-black text-pmc-blue uppercase tracking-widest mb-1">Scan for Reward</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-slate-50 p-6 rounded-4xl border-2 border-slate-100 flex-1 relative group">
+                                        <img
+                                            src="/assets/golden-badge.png"
+                                            alt="Golden Prime Badge"
+                                            className="w-40 h-40 mx-auto rounded-2xl shadow-lg border-4 border-white object-cover"
+                                        />
+                                        <div className="mt-4">
+                                            <p className="text-[10px] font-black text-pmc-blue uppercase tracking-widest mb-1">Golden Prime Badge</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <p className="text-sm font-bold text-slate-800 leading-relaxed">
+                                        Scan the QR at partner shops or <span className="text-pmc-accent">download your official badge</span> below!
+                                    </p>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <a
+                                            href="/assets/golden-badge.png"
+                                            download="UrbanPulse_Golden_Badge.png"
+                                            className="btn-pmc-accent flex items-center justify-center gap-2 py-4 text-xs"
+                                        >
+                                            Download Badge
+                                        </a>
+                                        <button
+                                            onClick={() => setRewardModal(null)}
+                                            className="w-full bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] py-4 hover:bg-slate-800 transition-all"
+                                        >
+                                            Dismiss
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     </div>

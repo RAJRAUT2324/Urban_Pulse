@@ -10,14 +10,43 @@ import aiRoutes from './routes/aiRoutes.js';
 import impactRoutes from './routes/impactRoutes.js';
 import supportRoutes from './routes/supportRoutes.js';
 import emergencyRoutes from './routes/emergencyRoutes.js';
+import superiorRoutes from './routes/superiorRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
+import http from 'http';
+import { Server } from 'socket.io';
+
 dotenv.config();
+
+let io;
+
 const startServer = async () => {
 
     const app = express();
+    const server = http.createServer(app);
+    io = new Server(server, {
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"]
+        }
+    });
+
     app.use(cors());
     app.use(express.json());
+
+    // Socket.io initialization
+    io.on('connection', (socket) => {
+        console.log('New client connected to Asha Neural Bridge');
+        socket.on('disconnect', () => {
+            console.log('Client disconnected');
+        });
+    });
+
+    // Share io instance with request
+    app.use((req, res, next) => {
+        req.io = io;
+        next();
+    });
 
     // Diagnostic Logger
     app.use((req, res, next) => {
@@ -46,18 +75,17 @@ const startServer = async () => {
     app.use('/api/impact', impactRoutes);
     app.use('/api/support', supportRoutes);
     app.use('/api/emergency', emergencyRoutes);
+    app.use('/api/superior', superiorRoutes);
 
     app.use(notFound);
     app.use(errorHandler);
 
     const PORT = process.env.PORT || 5000;
-    // ...
-
 
     try {
-        app.listen(
+        server.listen(
             PORT,
-            console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
+            console.log(`🚀 Asha Neural Bridge active in ${process.env.NODE_ENV} mode on port ${PORT}`)
         );
     } catch (error) {
         console.error(`Error starting server: ${error.message}`);
@@ -66,4 +94,6 @@ const startServer = async () => {
 };
 
 startServer();
+
+export { io };
 

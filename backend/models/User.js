@@ -33,6 +33,28 @@ const userSchema = mongoose.Schema(
         address: {
             type: String,
         },
+        latitude: {
+            type: Number,
+        },
+        longitude: {
+            type: Number,
+        },
+        workerPoints: {
+            type: Number,
+            default: 0,
+        },
+        tasksVerified: {
+            type: Number,
+            default: 0,
+        },
+        qualityScore: {
+            type: Number,
+            default: 0,
+        },
+        badgeCount: {
+            type: Number,
+            default: 0,
+        },
     },
     {
         timestamps: true,

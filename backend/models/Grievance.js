@@ -13,9 +13,13 @@ const grievanceSchema = mongoose.Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Reported', 'AI Classified', 'Force Assigned', 'Blockchain Verified', 'Pending Verification', 'Resolved', 'Archived'],
+        enum: ['Reported', 'AI Classified', 'Worker Assigned', 'Work Under Review', 'Blockchain Verified', 'Pending Verification', 'Resolved', 'Archived'],
         default: 'Reported'
     },
+    assignedWorker: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    assignedAt: { type: Date },
+    completedAt: { type: Date },
+    resolutionProofUrl: { type: String },
     department: {
         type: String,
         enum: ['Roads', 'Water', 'Electricity', 'Waste Management', 'Public Health', 'Other'],
